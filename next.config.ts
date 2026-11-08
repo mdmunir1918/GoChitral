@@ -1,9 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
+  // Serve query-specific Explore HTML on the first response, including without JS.
+  cacheComponents: false,
   turbopack: {
     rules: {
       "*.css": {

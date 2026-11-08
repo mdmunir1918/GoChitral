@@ -1,3 +1,24 @@
+# Module 01 · Branded navigation
+
+**Completed on 9 November 2026.** Next module: 02, discovery with local data.
+
+## Review Module 01
+
+1. Open [the local home page](http://127.0.0.1:3000/) as a guest. On desktop, use Explore in the header or the link below the search box.
+2. Set the viewport to 360 px wide. Tab to Menu, press Enter, then Escape. Focus returns to Menu. Reopen it, tab to Explore and press Enter. Use the GoChitral logo to return home.
+3. Search for `Bumburet`. Copy the [result URL](http://127.0.0.1:3000/explore?q=Bumburet) into another tab and clear the search. Module 02 supplies the first catalogue listings.
+
+## Implementation and verification
+
+- The shared layout includes the original logo, Home and Explore navigation, skip link and footer. A native mobile disclosure supports keyboard navigation without JavaScript. The home page includes an attributed photograph and a labelled GET search form. No packages, services or environment variables were added.
+- The initial production HTML contained the home heading and Explore link. Browser checks passed in Chrome at 360 and 1366 px, with JavaScript on and off. Both widths fit without horizontal scrolling. Navigation, return via the logo, search, and clear all worked. Escape closed the enhanced menu and restored focus.
+- A first browser run found that partial prerendering left the query response hidden with JavaScript disabled. Explore now renders the query on the server and home stays static. All four browser configurations passed on the rebuilt app.
+- A guest submitted literal HTML brackets and an ampersand through the search form. The URL round-tripped the text, the heading showed the literal query and the browser created no injected element.
+- Temporarily omitting the logo produced the text home link on Explore. The server identified the expected asset path. The original file was restored and its Git diff was empty.
+- `npm run lint`, `npm run build` and `npm run typecheck` passed.
+
+---
+
 # Module 00 · Windows project setup
 
 **Status on 9 November 2026** — Completed. Git checkpoint title: `Set up GoChitral Windows project (Module 00)`.

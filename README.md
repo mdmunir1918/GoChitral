@@ -1,6 +1,6 @@
 # GoChitral
 
-GoChitral is a tourist guide and itinerary planner for Chitral. Module 00 provides the local application and its build checks. The [progress record](docs/progress.md) tracks each module.
+GoChitral is a tourist guide and itinerary planner for Chitral. The local app includes a branded home page, responsive navigation and an Explore entry point. The [progress record](docs/progress.md) tracks each module.
 
 ## Run on Windows
 
@@ -30,8 +30,10 @@ npm.cmd run typecheck
 npm.cmd start -- --hostname 127.0.0.1
 ```
 
-The build generates route types used by the type checker. Open the local URL and verify the GoChitral wordmark and trip-planning description load. Press Ctrl+C when finished.
+The build generates route types used by the type checker. Open the local URL, enter a place name, and submit the search. Explore displays the query in its shareable URL. The logo returns home. Press Ctrl+C when finished.
 
 ## Project files
 
 The App Router entry points and Tailwind styles live in `src/app/`. The supplied artwork is in `public/brand/`. Follow the [build guide](docs/GoChitral_Build_Guide.md) in order and review the result of each module.
+
+The home photograph is [The City of Chitral and Tirich Mir by Emaad Paracha](https://commons.wikimedia.org/wiki/File:The_City_of_Chitral_and_Tirich_Mir.jpg). The local copy was resized and converted to WebP, and its display crop varies with screen width. It is distributed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).

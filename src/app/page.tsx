@@ -1,22 +1,29 @@
 import Image from "next/image";
 import Link from "next/link";
+import { PlaceSearch } from "@/components/place-search";
 
 export default function Home() {
   return (
-    <main className="grid min-h-svh place-content-center justify-items-center gap-5 px-6 text-center">
-      <h1>
-        <Link href="/" aria-label="GoChitral home" className="inline-block">
-          <Image
-            src="/brand/gochitral-logo.png"
-            alt="GoChitral"
-            width={1536}
-            height={630}
-            className="h-auto w-72 max-w-full"
-            unoptimized
-          />
-        </Link>
-      </h1>
-      <p className="max-w-sm text-lg">A local guide and trip planner for Chitral.</p>
-    </main>
+    <div className="frame home">
+      <section className="hero-copy" aria-labelledby="home-title">
+        <p className="location">Hindu Kush <span aria-hidden="true">/</span> Pakistan</p>
+        <h1 id="home-title">Discover <em>Chitral.</em></h1>
+        <p className="intro">A local travel guide to the valleys and mountain landscapes of Chitral.</p>
+        <PlaceSearch />
+        <Link className="browse-link" href="/explore">Explore the guide <span aria-hidden="true">→</span></Link>
+      </section>
+      <figure className="landscape">
+        <Image src="/images/chitral-and-tirich-mir.webp" width={1400} height={927}
+          alt="Snow-covered Tirich Mir rises above Chitral town and the river."
+          className="landscape-photo" preload unoptimized />
+        <figcaption>
+          <span className="photo-title">Chitral &amp; Tirich Mir</span>
+          <span className="credit">
+            <a href="https://commons.wikimedia.org/wiki/File:The_City_of_Chitral_and_Tirich_Mir.jpg">Emaad Paracha</a>
+            {" · "}<a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>
+          </span>
+        </figcaption>
+      </figure>
+    </div>
   );
 }
