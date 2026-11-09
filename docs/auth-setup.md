@@ -26,6 +26,8 @@ Set the Reset password email link to:
 
 Use a development inbox permitted by your SMTP provider. Register at `/account/register`, select Tourist or Hotel manager, confirm the email and sign in. Managers can open `/manager`. Use `/account/forgot-password` to request recovery and follow the email to choose a password of at least 12 characters. An invalid or expired link offers a new recovery request.
 
+Supabase's built-in email service limits both recipients and sending volume. A registration response of `over_email_send_rate_limit` means the email sending quota is exhausted. Wait for that quota to recover or configure a custom SMTP service in Supabase Auth email settings. Configure the SMTP credentials in Supabase. [Supabase SMTP setup and current limits](https://supabase.com/docs/guides/auth/auth-smtp)
+
 ## Administrator provisioning
 
 Create and confirm your own account, then open `/account/mfa`. Enter the displayed setup key in an authenticator app and verify its six-digit code.

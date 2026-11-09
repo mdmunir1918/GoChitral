@@ -17,6 +17,13 @@ const messages: Record<string, string> = {
   expired: "That link is invalid or has expired. Request a new one to continue.",
   "signed-out": "You are signed out.",
   "rate-limit": "Too many attempts. Please try again in 15 minutes.",
+  over_email_send_rate_limit: "Registration is temporarily unavailable because the email service has reached its sending limit. Please try again later or contact the site administrator.",
+  over_request_rate_limit: "The sign-up service is receiving too many requests. Please wait a few minutes and try again.",
+  email_address_not_authorized: "The email service currently permits registration only for approved test addresses. Contact the site administrator to enable email delivery for your address.",
+  email_address_invalid: "The email service could not accept that email address. Please use a valid personal email address.",
+  weak_password: "Please choose a stronger password with at least 12 characters.",
+  signup_disabled: "Registration is currently disabled. Please contact the site administrator.",
+  email_provider_disabled: "Email registration is currently disabled. Please contact the site administrator.",
 };
 
 export default async function AuthScreen({ params, searchParams }: PageProps<"/account/[screen]">) {
@@ -54,8 +61,10 @@ export default async function AuthScreen({ params, searchParams }: PageProps<"/a
       {typeof query.draft === "string" && <input type="hidden" name="draft" value={query.draft.slice(0, 36)} />}
       {screen !== "reset-password" && <label>Email<input name="email" type="email" autoComplete="email" maxLength={254} required /></label>}
       {screen !== "forgot-password" && <label>Password<input name="password" type="password"
+        aria-describedby={screen === "sign-in" ? undefined : "password-help"}
         autoComplete={screen === "sign-in" ? "current-password" : "new-password"} minLength={screen === "sign-in" ? 1 : 12} maxLength={128} required /></label>}
-      {screen === "register" && <label>Account type<select name="accountType"><option value="tourist">Tourist</option><option value="manager">Hotel manager</option></select></label>}
+      {(screen === "register" || screen === "reset-password") && <p id="password-help">Use at least 12 characters for your password.</p>}
+      {screen === "register" && <label>Account type<select name="accountType" defaultValue={query.accountType === "manager" ? "manager" : "tourist"}><option value="tourist">Tourist</option><option value="manager">Hotel manager</option></select></label>}
       <button type="submit">{screen === "forgot-password" ? "Send recovery link" : screen === "reset-password" ? "Save password" : titles[screen as keyof typeof titles]}</button>
     </form>
     <nav className="account-links" aria-label="Account options">

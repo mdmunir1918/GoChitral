@@ -47,7 +47,12 @@ export async function authenticate(form: FormData) {
       email: email.data, password: password.data,
       options: { data: { account_type: accountType }, emailRedirectTo: `${process.env.APP_ORIGIN}/auth/confirm` },
     });
-    if (error) redirect("/account/register?message=failed");
+    if (error) {
+      const codes = ["over_email_send_rate_limit", "over_request_rate_limit",
+        "email_address_not_authorized", "email_address_invalid", "weak_password", "signup_disabled", "email_provider_disabled"];
+      const message = error.code && codes.includes(error.code) ? error.code : "failed";
+      redirect(`/account/register?message=${message}&accountType=${accountType}&next=${encodeURIComponent(next)}${draft.success ? `&draft=${draft.data}` : ""}`);
+    }
     redirect("/account/sign-in?message=check-email");
   }
   const { error } = await supabase.auth.signInWithPassword({ email: email.data, password: password.data });

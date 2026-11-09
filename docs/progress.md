@@ -1,6 +1,16 @@
 # Module 04 · Accounts and role checks
 
-**Completed on 9 November 2026.** Next module: 05, administrator publishing.
+**Implemented on 9 November 2026.** Live email signup is currently blocked by Supabase's sending limit. Resolve the email configuration before Module 05.
+
+## Registration follow-up on 9 November 2026
+
+No permanent or default accounts were created. The temporary verification identities were deleted. A registration diagnostic returned HTTP 429 with Supabase code `over_email_send_rate_limit` and created no account. Email signup is enabled and confirmation is required.
+
+The app now reports allowlisted registration failures, including email sending limits and SMTP recipient restrictions, instead of using the generic failure message for those errors. Failed registration preserves the selected account type and return path. The form explains the 12-character password requirement before submission.
+
+The provider's email quota must recover, or a custom SMTP provider must be configured in Supabase, before confirmation-based signup can succeed. Default Supabase SMTP also limits delivery to organization team addresses. The previous browser tests verified temporary identities and callback handling, while real signup email delivery remained unverified.
+
+The fix passed the production build, standalone type checking and targeted lint. Chrome at 360 px verified the email-limit and recipient-restriction messages, tourist/manager selection retention, password guidance and layout without sending more emails.
 
 ## Review
 
