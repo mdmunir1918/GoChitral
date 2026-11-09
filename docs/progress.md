@@ -12,6 +12,8 @@ The provider's email quota must recover, or a custom SMTP provider must be confi
 
 The fix passed the production build, standalone type checking and targeted lint. Chrome at 360 px verified the email-limit and recipient-restriction messages, tourist/manager selection retention, password guidance and layout without sending more emails.
 
+An external-browser follow-up confirmed both registration URLs returned HTTP 200, but submitting from localhost conflicted with the configured 127.0.0.1 origin. A standard Next.js host redirect now sends localhost requests to the configured local origin. Proxy-based redirects were discarded after Next.js normalized them into a loop. External Chrome verified both addresses load registration and submit sign-in without an origin error. The server was restarted after the successful build and type check.
+
 ## Review
 
 Open [Account](http://127.0.0.1:3000/account). Create a tourist or hotel manager account, confirm its email and sign in. A guest requesting the manager workspace returns there after sign-in. Sign out from Account. Use the recovery link to change a password. [Auth setup](auth-setup.md) records email templates, callback configuration and trusted administrator provisioning.
