@@ -2,6 +2,8 @@
 
 GoChitral is a tourist guide and itinerary planner for Chitral. Browse the local development catalogue by place, category or location. Destination pages link to related activities, hotels and guides. The [progress record](docs/progress.md) tracks each module.
 
+Module 04 adds accounts, manager access and administrator MFA. Follow [Auth setup](docs/auth-setup.md) for the Supabase email configuration and administrator provisioning command.
+
 ## Run on Windows
 
 Use PowerShell in the folder containing `package.json`. This project uses Node.js **24.22.1** and npm **11.19.1**. CI reads the exact Node version from `.nvmrc`.

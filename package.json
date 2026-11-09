@@ -14,11 +14,15 @@
     "db:status": "prisma migrate status",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
-    "db:verify": "tsx prisma/verify.ts"
+    "db:verify": "tsx prisma/verify.ts",
+    "auth:verify": "tsx prisma/verify-auth.ts",
+    "auth:admin": "tsx prisma/provision-admin.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.119.0",
     "dotenv": "^18.0.10",
     "next": "16.4.5",
     "pg": "^8.23.1",

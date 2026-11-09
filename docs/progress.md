@@ -1,6 +1,33 @@
+# Module 04 · Accounts and role checks
+
+**Completed on 9 November 2026.** Next module: 05, administrator publishing.
+
+## Review
+
+Open [Account](http://127.0.0.1:3000/account). Create a tourist or hotel manager account, confirm its email and sign in. A guest requesting the manager workspace returns there after sign-in. Sign out from Account. Use the recovery link to change a password. [Auth setup](auth-setup.md) records email templates, callback configuration and trusted administrator provisioning.
+
+The ignored `.env` now contains the existing database connections, derived Supabase project URL, configured publishable key and local app origin. The safe placeholders are in `.env.example`.
+
+## Implementation
+
+- Supabase Auth handles registration, confirmation, sign-in, sign-out, recovery and TOTP MFA. Prisma stores protected account roles. Manager registration is allowlisted, and administrator assignment requires the operator command and a confirmed account with a verified authenticator.
+- Server checks verify the Supabase user, then run Prisma transactions with authenticated identity claims. PostgreSQL policies enforce active sessions, own profiles and own hotel drafts. Private pages and refreshed-cookie responses use private/no-store caching.
+- Local return paths and bounded guest draft references survive authentication. Mutations check the configured origin. PostgreSQL supplies a shared, atomic limit of eight attempts per identity per 15-minute window. Callback tokens are excluded from development request logs.
+
+## Verification
+
+- The account migration was applied to the development database. An initial reserved-word SQL error rolled back the transaction. Quoting the column, rehearsing a rollback and retrying deployment succeeded.
+- `auth:verify` passed with two tourists and two managers. Checked profile isolation, manager draft ownership, attempted administrator escalation, denied listing writes, revoked-session reads, external-return rejection and shared rate limits. The fixtures rolled back.
+- Browser tests used temporary confirmed development identities and then deleted them. Passed provider-backed sign-in, return to the manager workspace, MFA enrollment and verification, administrator MFA access, sign-out, old-cookie replay denial and tourist denial.
+- Separate temporary token fixtures passed provider-backed email confirmation, expired recovery rejection, valid recovery, password change and sign-in with the changed password. These tests exercised the callbacks without sending email to an inbox. Actual inbox delivery and dashboard email-template settings still need review with your own address.
+- Build, lint and standalone type checking passed. Account screens and redirects were checked at 360 px. Prisma connection acquisition was increased to a bounded ten seconds after a cold hosted-pooler connection exceeded its default wait.
+- Your permanent administrator account has not been chosen. Use the trusted provisioning command in the setup guide after enrolling its authenticator.
+
+---
+
 # Module 03 · Prisma and PostgreSQL preparation
 
-**Preparation completed on 9 November 2026.** The user requested Prisma and chose to connect the database later. Module 03 live database acceptance remains pending.
+**Completed on 9 November 2026.** The user supplied corrected development pooler credentials after the initial preparation.
 
 ## Scope
 
@@ -12,7 +39,7 @@ The schema includes catalogue publication, destination relationships, media, roo
 
 Follow [Prisma database setup](database-setup.md). Configure the ignored `.env.local` using `.env.example`, then review and apply the migration, seed the development database and run `db:verify`.
 
-Applying the migration, confirming persisted records after restart, and exercising the live database policies remain pending until a development connection is supplied.
+The migration and repeatable development seed were applied successfully to the configured Supabase development database.
 
 ## Verified locally
 
@@ -25,13 +52,13 @@ Applying the migration, confirming persisted records after restart, and exercisi
 
 ## Next action
 
-Connect the development database using the setup guide, then apply the migration, seed and run the database acceptance checks before proceeding to Module 04.
+Module 03 acceptance passed. Both pooler connections authenticated. `db:verify` passed published reads, hidden records, parent suspension, write denial, private-table denials and capacity/currency/price checks. Database-backed catalogue pages returned 200 after restart, while unknown, draft and suspended detail URLs returned 404.
 
 ## Connection attempt on 9 November 2026
 
 The user supplied the transaction and session pooler URLs in ignored `.env`. Prisma configuration, seed and verification scripts now load `.env.local` followed by `.env`, matching the app's precedence.
 
-Both Supabase endpoints were reachable outside the network sandbox, but both rejected credentials with PostgreSQL code `28P01`. URL checks confirmed the expected protocol, pooler host, username format, database name and ports. No secrets were printed. No migrations or seeds were applied. Module 04 is waiting for successful Module 03 database acceptance.
+The first attempt reached both endpoints but rejected credentials with PostgreSQL code `28P01`. The user corrected the passwords and both endpoints then authenticated. No secrets were printed. Migration, seed and acceptance checks subsequently succeeded.
 
 ---
 
