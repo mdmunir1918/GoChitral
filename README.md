@@ -1,6 +1,6 @@
 # GoChitral
 
-GoChitral is a tourist guide and itinerary planner for Chitral. The local app includes a branded home page, responsive navigation and an Explore entry point. The [progress record](docs/progress.md) tracks each module.
+GoChitral is a tourist guide and itinerary planner for Chitral. Browse the local development catalogue by place, category or location. Destination pages link to related activities, hotels and guides. The [progress record](docs/progress.md) tracks each module.
 
 ## Run on Windows
 
@@ -16,10 +16,10 @@ If Node or npm is missing on an x64 laptop, install the [Node.js 24.22.1 Windows
 
 ```powershell
 npm.cmd ci
-npm.cmd run dev -- --hostname 127.0.0.1
+npm.cmd run dev
 ```
 
-Open the local address printed in the terminal, usually [localhost:3000](http://localhost:3000). Press Ctrl+C to stop. Module 00 runs without service accounts or environment variables.
+Open the local address printed in the terminal, usually [127.0.0.1:3000](http://127.0.0.1:3000). Press Ctrl+C to stop. The development and production preview scripts bind to loopback. Keep this fixture-only build on your laptop. It runs without service accounts or environment variables.
 
 ## Verify a production build
 
@@ -27,13 +27,15 @@ Open the local address printed in the terminal, usually [localhost:3000](http://
 npm.cmd run lint
 npm.cmd run build
 npm.cmd run typecheck
-npm.cmd start -- --hostname 127.0.0.1
+npm.cmd start
 ```
 
-The build generates route types used by the type checker. Open the local URL, enter a place name, and submit the search. Explore displays the query in its shareable URL. The logo returns home. Press Ctrl+C when finished.
+The build generates route types used by the type checker. Search for Bumburet on the home page and follow the Bumburet Valley link. The detail URL can be reopened directly on the same laptop. The hotel and guide profiles are fictional examples. Press Ctrl+C when finished.
 
 ## Project files
 
 The App Router entry points and Tailwind styles live in `src/app/`. The supplied artwork is in `public/brand/`. Follow the [build guide](docs/GoChitral_Build_Guide.md) in order and review the result of each module.
 
 The home photograph is [The City of Chitral and Tirich Mir by Emaad Paracha](https://commons.wikimedia.org/wiki/File:The_City_of_Chitral_and_Tirich_Mir.jpg). The local copy was resized and converted to WebP, and its display crop varies with screen width. It is distributed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+
+The catalogue also uses [Bumburet Valley XWJJ9009 by Numan Ali](https://commons.wikimedia.org/wiki/File:Bumburet_Valley_XWJJ9009.jpg) under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) and [Chitral Kalash Museum by G.H. Farooqui](https://commons.wikimedia.org/wiki/File:Chitral_Kalash_Museum.jpg) under [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). The local WebP versions retain the respective licenses. Images are resized and displayed with responsive crops. Each listing credits its photograph.

@@ -48,7 +48,7 @@ a:hover { text-decoration: underline; text-underline-offset: .25em; }
 }
 .location { font-size: .72rem; font-weight: 650; letter-spacing: .14em; text-transform: uppercase; }
 .location span, .divider { margin-inline: .5em; color: var(--muted); }
-h1, .photo-title, .catalogue-status h2 { font-family: var(--serif); font-weight: 400; }
+h1, .photo-title { font-family: var(--serif); font-weight: 400; }
 h1 { font-size: clamp(4rem, 7.2vw, 7.4rem); line-height: .99; letter-spacing: -.055em; }
 h1 em { font-weight: 400; }
 .home h1 { margin-block: 1.5rem; }
@@ -73,9 +73,8 @@ figcaption { display: flex; justify-content: space-between; align-items: baselin
 .footer-row { min-height: 4.5rem; font-size: .85rem; }
 .explore-page { padding-block: clamp(3rem, 7vw, 6rem); }
 .explore-page h1 { font-size: clamp(3.3rem, 6vw, 6rem); }
-.catalogue-status { max-width: 38rem; margin-top: 2.5rem; padding-top: 1.6rem; border-top: 1px solid var(--rule); overflow-wrap: anywhere; }
-.catalogue-status h2 { font-size: 1.8rem; margin-bottom: .5rem; }
-.catalogue-status p { color: var(--muted); }
+.text-link { text-decoration: underline; text-underline-offset: .2em; }
+.listing-location { color: var(--muted); font-size: .76rem; font-weight: 650; letter-spacing: .07em; text-transform: uppercase; }
 
 @media (max-width: 48rem) {
   .home { grid-template-columns: minmax(0, 1fr); }

@@ -1,3 +1,26 @@
+# Module 02 · Discovery with local data
+
+**Completed on 9 November 2026.** Next module: 03, PostgreSQL catalogue.
+
+## Review Module 02
+
+1. Open [Explore](http://127.0.0.1:3000/explore), or search for Bumburet from home.
+2. Open [Bumburet Valley](http://127.0.0.1:3000/destinations/bumburet-valley) and copy its URL into another browser on the same laptop. Follow its related museum or sample guide link.
+3. Filter activities to Bumburet and apply the filters. Search for an unknown term and use Clear filters. Sort the full catalogue by name and follow Next and Previous.
+
+## Implementation and verification
+
+- Six published development fixtures cover two destinations, two museums, a fictional hotel and a fictional guide. Each has a stable ID, slug, publication state and review date. Sources and photograph credits appear on details. The hotel and guide examples have no booking or contact actions.
+- The shared catalogue adapter owns search, filtering, sorting, publication checks and detail reads. Three items appear per page, page numbers are bounded, query text is capped at 100 characters, and category, location and sort fields are allowlisted.
+- Six detail URLs returned HTTP 200. Unknown destinations, mismatched categories, the draft hotel and the suspended guide returned HTTP 404. Neither hidden record appeared in search.
+- Browser checks passed in Chrome at 1366 px with JavaScript and 360 px without JavaScript. Checked home search, a fresh browser opening the copied URL, related links, combined filters, both pagination directions, alphabetical sorting, zero results and clear filters.
+- Invalid filter names fell back to valid defaults. Oversized page numbers clamped to the final page and a supplied page-size parameter could not change the three-item limit. HTML-shaped query text rendered as text, with no injected image. Long queries remained within the input bound without horizontal overflow.
+- The first browser check exposed ambiguous wrapped select labels. Explicit label associations fixed the controls. Navigation checks subsequently waited for the destination page before asserting its content.
+- Lint, production build and standalone type checking passed. The build generated six public listing pages. Desktop and mobile Explore screenshots were visually inspected.
+- No dependencies or services were added. npm scripts bind to loopback, and metadata marks the fixture build noindex. Keep the catalogue local during development.
+
+---
+
 # Module 01 · Branded navigation
 
 **Completed on 9 November 2026.** Next module: 02, discovery with local data.

@@ -4,6 +4,7 @@ import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  robots: { index: false, follow: false },
   title: { default: "GoChitral | Chitral travel guide", template: "%s | GoChitral" },
   description: "Explore Chitral’s mountain valleys with the GoChitral travel guide.",
 };

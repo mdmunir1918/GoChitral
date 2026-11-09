@@ -1,0 +1,43 @@
+.catalogue-note { margin-top: .9rem; color: var(--muted); font-size: .88rem; }
+.explore-page .place-search {
+  max-width: none;
+  display: grid;
+  grid-template-columns: minmax(12rem, .85fr) minmax(0, 1.65fr);
+  gap: .45rem 1rem;
+  align-items: end;
+  border-block: 1px solid var(--rule);
+  padding-block: 1.2rem;
+}
+.explore-page .place-search > label { grid-area: 1 / 1; margin: 0; }
+.explore-page .search-row { grid-area: 2 / 1; padding-block: 0; }
+.catalogue-controls { grid-area: 1 / 2 / 3; display: flex; align-items: end; gap: 1rem; }
+.filter-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; flex: 1; }
+.filter-fields label { min-width: 0; margin: 0; }
+.filter-fields select {
+  display: block; width: 100%; min-height: 46px; margin-top: .45rem; padding-inline: .5rem;
+  border: 1px solid #9b919f; border-radius: .35rem; background: white; font-size: 1rem; font-weight: 400;
+}
+.catalogue-controls button { min-height: 46px; padding-inline: 1.1rem; border-radius: .35rem; color: var(--pearl); background: var(--aubergine); cursor: pointer; }
+.results-heading, .page-nav { display: flex; flex-wrap: wrap; align-items: baseline; gap: 1rem; }
+.results-heading { justify-content: space-between; margin: 2rem 0 1rem; overflow-wrap: anywhere; }
+.results-heading h2 { font: 1.65rem/1.2 var(--serif); }
+.listing-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.75rem; }
+.listing-card img { width: 100%; aspect-ratio: 1.65; object-fit: cover; border-radius: .25rem; }
+.listing-card .listing-location { margin-top: 1rem; }
+.listing-card h3 { margin: .4rem 0; font: 1.7rem/1.18 var(--serif); }
+.listing-card p:last-child { color: var(--muted); line-height: 1.5; }
+.page-nav { justify-content: center; border-top: 1px solid var(--rule); margin-top: 2rem; padding-top: 1.5rem; }
+@media (max-width: 64rem) {
+  .explore-page .place-search { display: block; }
+  .explore-page .place-search > label { margin-bottom: .45rem; }
+  .catalogue-controls { margin-top: .8rem; }
+}
+@media (max-width: 48rem) {
+  .listing-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 40rem) {
+  .listing-grid { grid-template-columns: minmax(0, 1fr); }
+  .catalogue-controls { display: block; }
+  .filter-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; }
+  .catalogue-controls button { margin-top: .8rem; }
+}
