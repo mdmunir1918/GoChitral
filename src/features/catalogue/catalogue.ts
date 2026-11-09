@@ -1,11 +1,6 @@
-import { fixtures } from "@/data/catalogue-fixtures";
+import { readPublishedListings } from "./database";
 import { categoryLabels, type Category, type Listing } from "./types";
 
-const published = fixtures.filter((item) => item.status === "published");
-const destinations = published.filter((item) => item.category === "destinations");
-const visible = published.filter((item) => item.category === "destinations" ||
-  destinations.some((destination) => destination.id === item.destinationId));
-const locations = [...new Set(visible.map((item) => item.location))].sort();
 const pageSize = 3;
 
 type Params = Record<string, string | string[] | undefined>;
@@ -28,6 +23,8 @@ export function pageUrl(filters: Filters, page: number) {
 // Routes read public catalogue data only through this adapter.
 export const catalogue = {
   async search(params: Params) {
+    const visible = await readPublishedListings();
+    const locations = [...new Set(visible.map((item) => item.location))].sort();
     const category = first(params.category);
     const location = first(params.location);
     const sort = first(params.sort);
@@ -55,6 +52,8 @@ export const catalogue = {
   },
 
   async detail(category: string, slug: string) {
+    if (!Object.hasOwn(categoryLabels, category)) return null;
+    const visible = await readPublishedListings();
     const item = visible.find((record) => record.category === category && record.slug === slug);
     if (!item) return null;
     const destinationId = item.destinationId ?? item.id;
@@ -64,6 +63,7 @@ export const catalogue = {
   },
 
   async paths() {
+    const visible = await readPublishedListings();
     return visible.map(({ category, slug }: Listing) => ({ category, slug }));
   },
 };

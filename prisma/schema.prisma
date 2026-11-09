@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Category {
+  destinations
+  activities
+  hotels
+  guides
+}
+
+enum PublicationStatus {
+  draft
+  published
+  suspended
+}
+
+model Listing {
+  id                  String @id
+  category            Category
+  slug                String
+  title               String
+  location            String
+  summary             String
+  description         String
+  visitorNote         String
+  reviewed            DateTime @db.Date
+  status              PublicationStatus @default(draft)
+  sourceTitle         String?
+  sourceUrl           String?
+  displayOrder        Int @default(0)
+  destinationId       String?
+  destinationCategory Category?
+  destination         Listing? @relation("Destination", fields: [destinationId, destinationCategory], references: [id, category], onDelete: Restrict)
+  related             Listing[] @relation("Destination")
+  photoId             String
+  photo               Media @relation(fields: [photoId], references: [id], onDelete: Restrict)
+  rooms               Room[]
+  ownership           HotelOwnership?
+  verification        GuideVerification?
+
+  @@unique([id, category])
+  @@unique([category, slug])
+  @@index([status, displayOrder, id])
+  @@index([destinationId])
+}
+
+model Media {
+  id       String @id
+  src      String @unique
+  width    Int
+  height   Int
+  alt      String
+  caption  String
+  author   String
+  original String
+  license  String
+  listings Listing[]
+}
+
+model Room {
+  id            String @id @default(uuid())
+  hotelId       String
+  hotelCategory Category @default(hotels)
+  hotel         Listing @relation(fields: [hotelId, hotelCategory], references: [id, category], onDelete: Restrict)
+  title         String
+  capacity      Int
+  nightlyMinor  Int?
+  currency      String @default("PKR")
+  status        PublicationStatus @default(draft)
+  @@index([hotelId])
+}
+
+// No public policies or grants. Auth ownership workflows arrive in Modules 04–06.
+model HotelOwnership {
+  hotelId String @id
+  hotel   Listing @relation(fields: [hotelId], references: [id], onDelete: Restrict)
+  ownerId String
+}
+
+model GuideVerification {
+  guideId String @id
+  guide   Listing @relation(fields: [guideId], references: [id], onDelete: Restrict)
+  evidence String
+}

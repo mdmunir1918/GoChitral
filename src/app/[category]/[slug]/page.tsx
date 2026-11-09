@@ -8,8 +8,7 @@ import "./detail.css";
 
 type Props = PageProps<"/[category]/[slug]">;
 
-export const dynamicParams = false;
-export const generateStaticParams = () => catalogue.paths();
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { category, slug } = await params;

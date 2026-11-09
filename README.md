@@ -19,7 +19,7 @@ npm.cmd ci
 npm.cmd run dev
 ```
 
-Open the local address printed in the terminal, usually [127.0.0.1:3000](http://127.0.0.1:3000). Press Ctrl+C to stop. The development and production preview scripts bind to loopback. Keep this fixture-only build on your laptop. It runs without service accounts or environment variables.
+Open the local address printed in the terminal, usually [127.0.0.1:3000](http://127.0.0.1:3000). Press Ctrl+C to stop. The development and production preview scripts bind to loopback. Module 03 reads the catalogue from PostgreSQL through Prisma. Follow [database setup](docs/database-setup.md) to configure the server-only connections, apply migrations and seed development data.
 
 ## Verify a production build
 

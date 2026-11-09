@@ -1,3 +1,34 @@
+# Module 03 · Prisma and PostgreSQL preparation
+
+**Preparation completed on 9 November 2026.** The user requested Prisma and chose to connect the database later. Module 03 live database acceptance remains pending.
+
+## Scope
+
+Prisma manages the PostgreSQL catalogue through the existing adapter. The fixture file becomes development seed input. Runtime reads use the database and a restricted public role. Catalogue routes keep their URLs and read at request time. An unavailable database shows a retry screen.
+
+The schema includes catalogue publication, destination relationships, media, rooms, private hotel ownership and private guide verification. The migration adds PostgreSQL constraints, RLS and explicit grants. Runtime and migration connection strings are server-only.
+
+## Connection handoff
+
+Follow [Prisma database setup](database-setup.md). Configure the ignored `.env.local` using `.env.example`, then review and apply the migration, seed the development database and run `db:verify`.
+
+Applying the migration, confirming persisted records after restart, and exercising the live database policies remain pending until a development connection is supplied.
+
+## Verified locally
+
+- Prisma 7.10.1 schema validation and client generation passed without database credentials. The generated client is ignored and recreated during installation and build.
+- The initial PostgreSQL SQL was generated from the schema. Reviewed the additional capacity, currency, price and destination constraints, public read policies and private-table denials. These await execution against PostgreSQL.
+- Production build, lint and standalone type checking passed. Listing routes are dynamic and require no database during the build.
+- Chrome verified that home returned HTTP 200 and that Explore and a detail route showed the safe retry screen without a configured connection. Retry remained available. The visible text exposed no connection strings or Prisma diagnostics, and no fixture listings appeared.
+- `.env.local` and generated client files are ignored. `.env.example` is tracked with empty values.
+- npm reported eight moderate dependency advisories during installation. No forced dependency upgrades were applied.
+
+## Next action
+
+Connect the development database using the setup guide, then apply the migration, seed and run the database acceptance checks before proceeding to Module 04.
+
+---
+
 # Module 02 · Discovery with local data
 
 **Completed on 9 November 2026.** Next module: 03, PostgreSQL catalogue.
