@@ -4,6 +4,12 @@
 
 ## Registration follow-up on 9 November 2026
 
+### Retained development accounts for user review
+
+At the user's request, a confirmed tourist account and an unconfirmed manager account were created through the trusted database operator. Random passwords and single-use, one-hour confirmation/recovery links are in the ignored `docs/development-credentials.local.md`. The file provides the test sequence and explains that the reserved email addresses have no inbox.
+
+The tourist credentials passed browser sign-in and sign-out. The manager account correctly requires confirmation. The user's links were left unused. These accounts are retained for the user's manual review. Creating accounts through the public registration form and delivering email remain dependent on Supabase SMTP.
+
 No permanent or default accounts were created. The temporary verification identities were deleted. A registration diagnostic returned HTTP 429 with Supabase code `over_email_send_rate_limit` and created no account. Email signup is enabled and confirmation is required.
 
 The app now reports allowlisted registration failures, including email sending limits and SMTP recipient restrictions, instead of using the generic failure message for those errors. Failed registration preserves the selected account type and return path. The form explains the 12-character password requirement before submission.
