@@ -3,7 +3,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { fixtures } from "../src/data/catalogue-fixtures";
 
-config({ path: ".env.local" });
+config({ path: [".env.local", ".env"], quiet: true });
 if (!process.env.DIRECT_URL) throw new Error("Set DIRECT_URL for the development database.");
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DIRECT_URL }) });
 

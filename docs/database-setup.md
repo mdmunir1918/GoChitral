@@ -4,9 +4,11 @@ Prisma owns the catalogue schema and migration history. Supabase can provide the
 
 ## Configure a development database
 
-Create a separate Supabase development project, or select an empty PostgreSQL development database. Copy `.env.example` to `.env.local`.
+Create a separate Supabase development project, or select an empty PostgreSQL development database. Copy `.env.example` to `.env` or `.env.local`. Next.js and the Prisma commands load these files, with `.env.local` taking precedence.
 
 Set `DIRECT_URL` to the operator's direct or session-pool connection string. Set `DATABASE_URL` to the runtime connection string, using a restricted login granted membership in `gochitral_public`. Keep both passwords out of chat and Git. Prisma reads migrations from `prisma/migrations/`, so use Prisma commands for schema changes.
+
+Supabase's transaction pooler uses port 6543 and its session pooler uses port 5432. Use the project's database password in each connection URL and percent-encode special characters in the password. PostgreSQL error `28P01` indicates that the server rejected the supplied credentials.
 
 ```powershell
 npm.cmd run db:generate

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { config } from "dotenv";
 import { Client } from "pg";
 
-config({ path: ".env.local" });
+config({ path: [".env.local", ".env"], quiet: true });
 if (!process.env.DIRECT_URL) throw new Error("Set DIRECT_URL for an isolated seeded development database.");
 const db = new Client({ connectionString: process.env.DIRECT_URL, connectionTimeoutMillis: 5000 });
 

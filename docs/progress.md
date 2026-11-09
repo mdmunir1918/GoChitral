@@ -27,6 +27,12 @@ Applying the migration, confirming persisted records after restart, and exercisi
 
 Connect the development database using the setup guide, then apply the migration, seed and run the database acceptance checks before proceeding to Module 04.
 
+## Connection attempt on 9 November 2026
+
+The user supplied the transaction and session pooler URLs in ignored `.env`. Prisma configuration, seed and verification scripts now load `.env.local` followed by `.env`, matching the app's precedence.
+
+Both Supabase endpoints were reachable outside the network sandbox, but both rejected credentials with PostgreSQL code `28P01`. URL checks confirmed the expected protocol, pooler host, username format, database name and ports. No secrets were printed. No migrations or seeds were applied. Module 04 is waiting for successful Module 03 database acceptance.
+
 ---
 
 # Module 02 · Discovery with local data
