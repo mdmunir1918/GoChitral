@@ -46,6 +46,8 @@ export default async function ListingPage({ params }: Props) {
           <p>{item.description}</p>
           <h2>Visitor notes</h2>
           <p>{item.visitorNote}</p>
+          {item.contactUrl && <p><a className="text-link" href={item.contactUrl}>Public contact website</a></p>}
+          {item.latitude !== undefined && item.longitude !== undefined && <p>Coordinates · {item.latitude}, {item.longitude}</p>}
           <p className="source-note">Development listing · Reviewed <time dateTime={item.reviewed}>{reviewed}</time>
             {item.source && <><br /><a className="text-link" href={item.source.url}>{item.source.title}</a></>}
           </p>

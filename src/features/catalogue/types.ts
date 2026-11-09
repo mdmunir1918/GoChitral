@@ -30,6 +30,9 @@ type ListingFields = {
   source?: { title: string; url: string };
   reviewed: string;
   status: "published" | "draft" | "suspended";
+  contactUrl?: string;
+  latitude?: number;
+  longitude?: number;
 };
 
 export type Listing = ListingFields & (

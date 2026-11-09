@@ -20,6 +20,12 @@ enum PublicationStatus {
   suspended
 }
 
+enum RevisionStatus {
+  draft
+  pending
+  approved
+}
+
 enum AccountRole {
   tourist
   manager
@@ -60,11 +66,39 @@ model Listing {
   rooms               Room[]
   ownership           HotelOwnership?
   verification        GuideVerification?
+  version             Int @default(1)
+  contactUrl          String?
+  latitude            Float?
+  longitude           Float?
+  revision            ListingRevision?
+  audits              AuditEntry[]
 
   @@unique([id, category])
   @@unique([category, slug])
   @@index([status, displayOrder, id])
   @@index([destinationId])
+}
+
+model ListingRevision {
+  listingId String @id
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  version   Int
+  status    RevisionStatus @default(draft)
+  payload   Json
+  updatedAt DateTime @updatedAt
+}
+
+model AuditEntry {
+  id                 String @id @default(uuid())
+  listingId          String
+  listing            Listing @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  actorId            String @db.Uuid
+  action             String
+  reason             String
+  revision           Int
+  createdAt          DateTime @default(now())
+  dependentTripCount Int @default(0)
+  @@index([listingId, createdAt])
 }
 
 model Media {

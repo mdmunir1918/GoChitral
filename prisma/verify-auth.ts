@@ -60,7 +60,7 @@ async function verify() {
       const hotels = await db.query('SELECT id FROM "Listing" WHERE id LIKE \'verify-manager-%\' ORDER BY id');
       assert.deepEqual(hotels.rows.map((row) => row.id), index >= 2 ? [`verify-manager-${index - 2}`] : []);
       await denied('UPDATE "Account" SET role = \'administrator\'');
-      await denied('UPDATE "Listing" SET status = \'published\'');
+      assert.equal((await db.query('UPDATE "Listing" SET status = \'published\'')).rowCount, 0);
       await db.query("RESET ROLE");
     }
     const person = people[2];

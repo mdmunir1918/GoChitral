@@ -1,6 +1,30 @@
+# Module 05 · Administrator publishing
+
+**Completed on 9 November 2026.** Next module: 06, hotel manager workspace. The user authorized continuing local development while SMTP remains deferred.
+
+## Review Module 05
+
+Use the Administrator section in the ignored `docs/development-credentials.local.md`. Add the setup key to an authenticator app, sign in and open [the publishing workspace](http://127.0.0.1:3000/admin). Verify the current code when prompted. [Publishing review steps](publishing.md) cover creating a listing, editing drafts in two tabs, publishing, suspension, reactivation and audit history.
+
+## Changes and checks
+
+- Added the Prisma publishing migration with versioned private draft revisions, optional public contact/coordinates and append-only moderation audit records. The migration passed a rolled-back rehearsal before deployment to the development database.
+- Administrator access and MFA are checked on every moderation action and reinforced by RLS. A database trigger derives the actor and records the action, target, version, timestamp, reason and dependent-trip count in the same transaction. Trips arrive in Module 08, so the current dependent-trip count is zero.
+- Save draft preserves the approved public listing. Conditional version updates reject stale saves while the controlled editor preserves unsaved text. Publish returns its public URL and revision. Category and slug stay stable after creation.
+- Contact/source links require HTTPS. Coordinate pairs are bounded. Guides have private evidence separate from public descriptions. Photo selection uses the existing approved media. Pending revision state is ready for manager submissions in Module 06.
+- `publishing:verify` passed for destinations, activities, hotels and guides. Checked draft visibility, stale saves, parent suspension hiding children, reactivation, audit ordering/actors, private guide evidence, administrator MFA denial, tourist write denial and validation. The test transaction rolled back.
+- Existing `auth:verify` and `db:verify` passed after adding the admin write policies. A denied RLS update now returns zero changed rows, and the account check verifies that result.
+- Browser acceptance passed creating/publishing a destination, saving an unpublished edit, preserving a stale tab's text, suspension with HTTP 404 and removal from Explore, reactivation with HTTP 200, and the six expected audit entries. A tourist replay of the actual moderation request was denied and the listing version stayed unchanged. Temporary test content and tourist identity were removed.
+- The actual `catalogue.paths()` source included a published test record, excluded it while suspended and restored it after reactivation. That record was removed afterward. Public routes remain dynamic and moderation invalidates detail, list, admin and future sitemap paths.
+- Desktop queue and 360 px editor screenshots were visually inspected. A misleading legacy draft label was corrected. Lint, build and standalone type checks passed.
+- A queue check with 52 temporary hotel drafts verified the 50-record page limit, oversized-page clamping and category retention across navigation. The records were removed. Review dates defaulted to Pakistan time.
+- A retained development administrator was created with confirmed identity and verified MFA through the trusted operator. Credentials and its authenticator setup key are stored only in the ignored local credentials file. No administrator is available through public registration.
+
+---
+
 # Module 04 · Accounts and role checks
 
-**Implemented on 9 November 2026.** Live email signup is currently blocked by Supabase's sending limit. Resolve the email configuration before Module 05.
+**Implemented on 9 November 2026.** Live email signup is currently blocked by Supabase's sending limit. The user deferred SMTP configuration while proceeding with confirmed development accounts.
 
 ## Registration follow-up on 9 November 2026
 

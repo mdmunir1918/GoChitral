@@ -4,6 +4,8 @@ GoChitral is a tourist guide and itinerary planner for Chitral. Browse the local
 
 Module 04 adds accounts, manager access and administrator MFA. Follow [Auth setup](docs/auth-setup.md) for the Supabase email configuration and administrator provisioning command.
 
+Module 05 adds [administrator publishing](docs/publishing.md), draft revisions, stale-edit protection, suspension/reactivation and audit history.
+
 ## Run on Windows
 
 Use PowerShell in the folder containing `package.json`. This project uses Node.js **24.22.1** and npm **11.19.1**. CI reads the exact Node version from `.nvmrc`.

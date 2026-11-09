@@ -27,6 +27,9 @@ export async function readPublishedListings(): Promise<Listing[]> {
         summary: row.summary, description: row.description, visitorNote: row.visitorNote,
         reviewed: row.reviewed.toISOString().slice(0, 10), status: row.status,
         photo: photoSchema.parse(row.photo),
+        contactUrl: row.contactUrl ? sourceUrl.parse(row.contactUrl) : undefined,
+        latitude: row.latitude ?? undefined,
+        longitude: row.longitude ?? undefined,
         source: row.sourceTitle && row.sourceUrl ? { title: row.sourceTitle, url: sourceUrl.parse(row.sourceUrl) } : undefined,
       };
       if (row.category === "destinations") return { ...common, category: row.category };
