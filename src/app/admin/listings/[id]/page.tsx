@@ -15,7 +15,7 @@ export default async function EditListing({ params, searchParams }: PageProps<"/
   const { category } = await searchParams;
   const selected: Category = typeof category === "string" && Object.hasOwn(categoryLabels, category) ? category as Category : "destinations";
   const data = await userDatabase(identity, async (tx) => ({
-    options: await editorOptions(tx),
+    options: await editorOptions(tx, id === "new" ? undefined : id),
     existing: id === "new" ? null : await editorData(tx, id),
   }));
   if (id !== "new" && !data.existing) notFound();
@@ -23,6 +23,7 @@ export default async function EditListing({ params, searchParams }: PageProps<"/
     category: selected, slug: "", title: "", location: "", summary: "", description: "", visitorNote: "",
     reviewed: reviewDateToday(), photoId: "", destinationId: "",
     sourceTitle: "", sourceUrl: "", contactUrl: "", latitude: "", longitude: "",
+    guideLanguages: "", guideExpertise: "", guideAreasServed: "", guideCredentialSummary: "", guidePricingUnit: "per_group_day",
   };
   const listing = data.existing?.listing;
   return <>

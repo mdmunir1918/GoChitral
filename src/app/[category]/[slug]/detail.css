@@ -1,4 +1,12 @@
 .listing-page { padding-block: clamp(2rem, 4vw, 4rem); }
+.hotel-overview { margin-top: 2rem; }
+.hotel-overview h2 { margin-top: 1.4rem; }
+.hotel-amenities { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; padding-left: 1rem; }
+.hotel-room-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: 1rem; margin-top: 1rem; }
+.hotel-room-list article { padding: 1rem; border: 1px solid var(--rule); border-radius: .3rem; }
+.hotel-room-list p { line-height: 1.6; }
+.public-hotel-photos { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: 1rem; }
+.public-hotel-photos img { width: 100%; height: auto; }
 .detail-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem 5%; margin-top: 2rem; }
 .detail-layout header { align-self: end; }
 .detail-layout h1 { font-size: clamp(3rem, 5.3vw, 6rem); margin-block: 1rem; }
@@ -14,6 +22,12 @@
 .related-listings ul { display: flex; flex-wrap: wrap; gap: 1.5rem 3rem; margin-top: 1rem; }
 .related-listings li { display: grid; gap: .3rem; }
 .related-listings a { font-size: 1.1rem; font-weight: 600; }
+.guide-profile, .guide-request-form { border: 1px solid var(--rule); border-radius: .35rem; padding: 1rem; margin-block: 1.25rem; display: grid; gap: .75rem; }
+.guide-profile h2 { margin: 0; }
+.guide-request-form label { display: grid; gap: .4rem; font-weight: 600; }
+.guide-request-form input, .guide-request-form select { min-height: 44px; width: 100%; padding: .65rem; border: 1px solid var(--rule); border-radius: .25rem; background: var(--surface); }
+.guide-request-form button { min-height: 44px; width: fit-content; padding: .65rem 1rem; border: 0; border-radius: .25rem; background: var(--terracotta); color: var(--pearl); cursor: pointer; }
+.guide-request-form button:disabled { opacity: .6; cursor: wait; }
 @media (max-width: 48rem) {
   .detail-layout { grid-template-columns: minmax(0, 1fr); }
   .detail-layout figure { grid-column: auto; grid-row: auto; }

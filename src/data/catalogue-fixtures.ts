@@ -23,6 +23,7 @@ const reviewed = "2026-11-09";
 const valley: Listing = {
   id: "dest-001", category: "destinations", slug: "bumburet-valley", title: "Bumburet Valley",
   location: "Bumburet", status: "published", reviewed, photo: valleyPhoto,
+  latitude: 35.698814, longitude: 71.685800,
   summary: "Explore a Kalasha valley of villages, carved timber buildings and mountain pastures.",
   description: "Bumburet is one of Chitral’s three Kalasha valleys, alongside Rumbur and Birir. In the village of Brun, the Kalasha culture centre brings local history and objects from everyday life together under one roof.",
   visitorNote: "Start in Brun if the museum is part of your visit. Ask residents before photographing people, entering homes or approaching ceremonial spaces.",
@@ -31,6 +32,7 @@ const valley: Listing = {
 const town: Listing = {
   id: "dest-002", category: "destinations", slug: "chitral-town", title: "Chitral Town",
   location: "Chitral town", status: "published", reviewed, photo: townPhoto,
+  latitude: 35.8462, longitude: 71.7858,
   summary: "Discover the riverside town below Tirich Mir and its collection of regional heritage.",
   description: "Chitral town sits along the river, with Tirich Mir rising beyond the rooftops. Pair a view across the valley with time at Chitral Museum, where the galleries introduce the region’s material culture.",
   visitorNote: "Ask at the museum about opening hours before planning the rest of your day around a visit.",
@@ -57,6 +59,7 @@ export const fixtures: Listing[] = [
   {
     id: "act-001", category: "activities", slug: "kalasha-dur-museum", title: "Kalasha Dur Museum",
     destinationId: valley.id, location: valley.location, status: "published", reviewed, photo: museumPhoto,
+    latitude: 35.69746, longitude: 71.68216,
     summary: "Look into Kalasha material culture through the museum’s collection in Bumburet.",
     description: "The museum’s ground floor holds objects from Kalasha communities and the wider Hindu Kush. The building also houses a school and a library dedicated to Kalasha culture.",
     visitorNote: "Confirm visiting hours and photography permissions with museum staff. Allow time to look closely at how household objects were made and used.",

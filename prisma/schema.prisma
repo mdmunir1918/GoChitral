@@ -32,9 +32,68 @@ enum AccountRole {
   administrator
 }
 
+enum GuideRequestStatus {
+  pending
+  confirmed
+  declined
+}
+
+enum GuidePricingUnit {
+  per_group_day
+}
+
+enum KnowledgeStatus {
+  draft
+  published
+  retired
+}
+
 model Account {
-  id   String @id @db.Uuid
+  id   String @id @default(uuid()) @db.Uuid
   role AccountRole @default(tourist)
+  email String @unique
+  emailVerified DateTime?
+  credential AuthCredential?
+  sessions AuthSession[]
+  tokens AuthToken[]
+  trips Trip[]
+  tripSaves TripSave[]
+  guideRequests GuideRequest[]
+}
+
+model AuthCredential {
+  accountId String @id @db.Uuid
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  passwordHash String?
+  mfaSecretEncrypted String?
+  mfaEnabled Boolean @default(false)
+  lastTotpStep BigInt?
+}
+
+model AuthSession {
+  id String @id @default(uuid()) @db.Uuid
+  accountId String @db.Uuid
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revokedAt DateTime?
+  mfaVerifiedAt DateTime?
+  createdAt DateTime @default(now())
+  @@index([accountId])
+}
+
+enum AuthTokenKind {
+  email
+  recovery
+}
+
+model AuthToken {
+  id String @id @default(uuid()) @db.Uuid
+  accountId String @db.Uuid
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  tokenHash String @unique
+  kind AuthTokenKind
+  expiresAt DateTime
+  @@index([accountId, kind])
 }
 
 model AuthRateLimit {
@@ -66,12 +125,16 @@ model Listing {
   rooms               Room[]
   ownership           HotelOwnership?
   verification        GuideVerification?
+  guideProfile        GuideProfile?
   version             Int @default(1)
   contactUrl          String?
   latitude            Float?
   longitude           Float?
+  servicePriceMinor   Int?
   revision            ListingRevision?
   audits              AuditEntry[]
+  hotelDetails        HotelDetails?
+  guideRequests GuideRequest[]
 
   @@unique([id, category])
   @@unique([category, slug])
@@ -124,6 +187,7 @@ model Room {
   nightlyMinor  Int?
   currency      String @default("PKR")
   status        PublicationStatus @default(draft)
+  availabilityNote String @default("")
   @@index([hotelId])
 }
 
@@ -138,4 +202,212 @@ model GuideVerification {
   guideId String @id
   guide   Listing @relation(fields: [guideId], references: [id], onDelete: Restrict)
   evidence String
+}
+
+model GuideProfile {
+  guideId String @id
+  guide Listing @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  languages String[]
+  expertise String[]
+  areasServed String[]
+  credentialSummary String
+  pricingUnit GuidePricingUnit @default(per_group_day)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+  @@index([updatedAt])
+}
+
+enum HotelReviewStatus {
+  draft
+  pending
+  approved
+  changes_requested
+}
+
+model HotelDraft {
+  id String @id @default(uuid())
+  ownerId String @db.Uuid
+  version Int @default(1)
+  status HotelReviewStatus @default(draft)
+  title String
+  destinationId String
+  contactUrl String @default("")
+  summary String @default("")
+  description String @default("")
+  visitorNote String @default("")
+  amenities String[] @default([])
+  reviewNote String @default("")
+  updatedAt DateTime @updatedAt
+  rooms HotelRoomDraft[]
+  photos HotelPhoto[]
+  @@index([ownerId, updatedAt])
+  @@index([status, updatedAt])
+}
+
+model HotelRoomDraft {
+  id String @id @default(uuid())
+  hotelId String
+  hotel HotelDraft @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  title String
+  capacity Int
+  nightlyMinor Int
+  availabilityNote String @default("")
+  archived Boolean @default(false)
+  @@index([hotelId])
+}
+
+model HotelPhoto {
+  id String @id @default(uuid())
+  hotelId String
+  hotel HotelDraft @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  key String @unique
+  width Int
+  height Int
+  bytes Int
+  inDraft Boolean @default(true)
+  approved Boolean @default(false)
+  createdAt DateTime @default(now())
+  @@index([hotelId, createdAt])
+}
+
+model HotelDetails {
+  hotelId String @id
+  hotel Listing @relation(fields: [hotelId], references: [id], onDelete: Restrict)
+  amenities String[] @default([])
+}
+
+model Trip {
+  id String @id @default(uuid()) @db.Uuid
+  ownerId String @db.Uuid
+  owner Account @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  title String
+  revision Int @default(1)
+  startDate DateTime @db.Date
+  endDate DateTime @db.Date
+  people Int
+  destinationIds String[]
+  destinationTitles String[]
+  budgetMinor BigInt?
+  knownTotalMinor BigInt
+  unknownCount Int
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+  days TripDay[]
+  items TripItem[]
+  saves TripSave[]
+  guideRequests GuideRequest[]
+  @@index([ownerId, updatedAt])
+}
+
+model TripDay {
+  id String @id @default(uuid()) @db.Uuid
+  tripId String @db.Uuid
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  date DateTime @db.Date
+  items TripItem[]
+  @@unique([tripId, date])
+  @@unique([id, tripId])
+}
+
+model TripItem {
+  id String @id @default(uuid()) @db.Uuid
+  tripId String @db.Uuid
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  dayId String @db.Uuid
+  day TripDay @relation(fields: [dayId, tripId], references: [id, tripId], onDelete: Cascade)
+  selectionId String @db.Uuid
+  listingId String
+  roomId String?
+  category Category
+  title String
+  quantity Int
+  unit String
+  unitMinor Int?
+  nights Int
+  totalMinor BigInt?
+  estimated Boolean
+  @@unique([tripId, selectionId])
+  @@index([dayId, tripId])
+}
+
+model TripSave {
+  ownerId String @db.Uuid
+  owner Account @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  key String @db.Uuid
+  tripId String @db.Uuid
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  requestHash String
+  revision Int
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  @@id([ownerId, key])
+  @@index([tripId])
+}
+
+model GuideRequest {
+  id String @id @default(uuid()) @db.Uuid
+  reference String @unique
+  ownerId String @db.Uuid
+  owner Account @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  guideId String
+  guide Listing @relation(fields: [guideId], references: [id], onDelete: Restrict)
+  guideTitle String
+  tripId String @db.Uuid
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  startDate DateTime @db.Date
+  endDate DateTime @db.Date
+  status GuideRequestStatus @default(pending)
+  priceMinor Int?
+  pricingUnit GuidePricingUnit
+  key String @db.Uuid
+  requestHash String
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+  audits GuideRequestAudit[]
+  @@unique([ownerId, key])
+  @@index([ownerId, createdAt])
+  @@index([guideId, status, startDate, endDate])
+  @@index([tripId, status])
+}
+
+model GuideRequestAudit {
+  id String @id @default(uuid()) @db.Uuid
+  requestId String @db.Uuid
+  request GuideRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  actorId String @db.Uuid
+  fromStatus GuideRequestStatus
+  toStatus GuideRequestStatus
+  reason String
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  @@index([requestId, createdAt])
+}
+
+model KnowledgeRule {
+  id String @id @default(uuid())
+  topic String
+  answer String
+  terms String[]
+  sourceTitle String
+  sourceUrl String
+  reviewedAt DateTime @db.Date
+  expiresAt DateTime? @db.Date
+  relatedListingIds String[] @default([])
+  status KnowledgeStatus @default(draft)
+  version Int @default(1)
+  // Kept nullable for compatibility; editor writes actor IDs only to the admin-only audit table.
+  updatedBy String? @db.Uuid
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+  audits KnowledgeRuleAudit[]
+  @@index([status, expiresAt])
+  @@index([updatedAt])
+}
+
+model KnowledgeRuleAudit {
+  id String @id @default(uuid()) @db.Uuid
+  ruleId String
+  rule KnowledgeRule @relation(fields: [ruleId], references: [id], onDelete: Restrict)
+  actorId String @db.Uuid
+  action String
+  reason String
+  version Int
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  @@index([ruleId, createdAt])
 }

@@ -2,9 +2,15 @@
 
 GoChitral is a tourist guide and itinerary planner for Chitral. Browse the local development catalogue by place, category or location. Destination pages link to related activities, hotels and guides. The [progress record](docs/progress.md) tracks each module.
 
-Module 04 adds accounts, manager access and administrator MFA. Follow [Auth setup](docs/auth-setup.md) for the Supabase email configuration and administrator provisioning command.
+Module 04 adds Auth.js accounts, manager access and administrator MFA. Follow [Auth setup](docs/auth-setup.md) for local recovery links, optional SMTP and administrator provisioning.
 
 Module 05 adds [administrator publishing](docs/publishing.md), draft revisions, stale-edit protection, suspension/reactivation and audit history.
+
+Module 06 adds the [hotel manager workspace](docs/hotel-workspace.md), private Cloudflare R2 photos, room drafts and admin review.
+
+Module 07 adds the [guest day planner and PKR budget](docs/planner.md). Module 08 adds [saved trips and printable summaries](docs/saved-trips.md), safe save retries, owner-only access and edit conflicts.
+
+Module 09 adds [public guide profiles and private guide requests](docs/guide-requests.md), with administrator decisions, audit history and overlapping-date protection.
 
 ## Run on Windows
 

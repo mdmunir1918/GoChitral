@@ -1,0 +1,38 @@
+.planner-page { max-width: 70rem; padding-block: 3rem 4rem; }
+.plan-controls { border: 0; min-width: 0; }
+.planner-page h1 { font-size: clamp(3rem, 6vw, 5.5rem); margin-block: .8rem 1.2rem; }
+.planner-page h1 em { color: var(--terracotta); }
+.planner-page h2 { font: 2rem/1.2 var(--serif); margin-block: 1.5rem 1rem; }
+.planner-page h3 { font-size: 1.1rem; font-weight: 650; margin-bottom: .7rem; }
+.planner-page p { line-height: 1.6; overflow-wrap: anywhere; }
+.planner-page button { min-height: 44px; padding: .65rem 1rem; border-radius: .3rem; background: var(--terracotta); color: var(--pearl); cursor: pointer; }
+.planner-page button:disabled { opacity: .6; cursor: not-allowed; }
+.planner-page .secondary { background: var(--aubergine); }
+.planner-page .text-button { background: transparent; color: var(--terracotta); text-decoration: underline; padding-inline: 0; }
+.plan-steps, .plan-actions, .plan-bottom { display: flex; flex-wrap: wrap; gap: .7rem 1rem; margin-block: 1.3rem; }
+.plan-steps button { background: transparent; color: var(--aubergine); border: 1px solid var(--rule); }
+.plan-steps button[aria-current] { background: var(--aubergine); color: var(--pearl); }
+.plan-storage { color: var(--muted); font-size: .9rem; margin-top: 1rem; }
+.plan-settings, .plan-add { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; max-width: 54rem; }
+.planner-page label { display: grid; gap: .4rem; font-weight: 600; }
+.planner-page input, .planner-page select { min-width: 0; width: 100%; min-height: 44px; padding: .7rem; border: 1px solid var(--rule); background: var(--surface); border-radius: .3rem; font-weight: 400; }
+.plan-settings fieldset, .plan-settings > p, .plan-add h3, .plan-add > p { grid-column: 1 / -1; }
+.plan-settings fieldset { border: 1px solid var(--rule); padding: 1rem; }
+.plan-settings legend { padding-inline: .3rem; font-weight: 600; }
+.planner-page .plan-check { display: flex; align-items: center; gap: .65rem; margin-block: .4rem; }
+.plan-check input { width: 1.15rem; min-height: 1.15rem; height: 1.15rem; }
+.plan-notice { border-left: 3px solid var(--terracotta); padding: .8rem 1rem; margin-block: 1rem; background: var(--surface); }
+.plan-notice ul { list-style: disc; padding-left: 1.2rem; margin-block: .5rem; }
+.plan-day-picker { max-width: 30rem; margin-block: 1.2rem; }
+.plan-add { border: 1px solid var(--rule); border-radius: .4rem; padding: 1.2rem; margin-block: 1.5rem; }
+.plan-days { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-block: 1.5rem; }
+.plan-day { min-width: 0; border-top: 1px solid var(--rule); padding-block: 1.1rem; }
+.plan-item, .plan-quote-item { display: grid; gap: .65rem; padding: 1rem; border: 1px solid var(--rule); margin-block: .8rem; border-radius: .3rem; }
+.plan-item label { font-size: .85rem; }
+.plan-item input { max-width: 8rem; }
+.plan-item button { justify-self: start; }
+.plan-quote-item h4 { font-weight: 650; }
+.plan-total { background: var(--aubergine); color: var(--pearl); border-radius: .4rem; padding: 1.3rem; margin-top: 1.5rem; }
+.plan-total p { margin-block: .6rem; }
+.plan-bottom { justify-content: space-between; align-items: center; border-top: 1px solid var(--rule); padding-top: 1rem; }
+@media (max-width: 40rem) { .plan-settings, .plan-add, .plan-days { grid-template-columns: minmax(0, 1fr); } .plan-steps { gap: .5rem; } .plan-steps button { padding-inline: .7rem; } }

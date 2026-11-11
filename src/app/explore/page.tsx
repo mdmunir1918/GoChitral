@@ -15,6 +15,7 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
     <section className="frame explore-page">
       <h1>Explore <em>Chitral.</em></h1>
       <p className="catalogue-note">Development catalogue · Sample hotel and guide profiles</p>
+      <p><Link className="browse-link" href="/recommendations">Get suggestions based on your interests →</Link></p>
       <PlaceSearch key={pageUrl(filters, 1)} query={filters.q}>
         <div className="filter-fields">
           <div><label htmlFor="category">Category</label>
@@ -47,10 +48,13 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
         {items.map((item) => (
           <article key={item.id} className="listing-card">
             <Image src={item.photo.src} alt={item.photo.alt} width={item.photo.width} height={item.photo.height}
+              unoptimized={item.photo.license === "owner"}
               sizes="(max-width: 640px) 90vw, (max-width: 900px) 44vw, 29vw" />
             <p className="listing-location">{categoryLabels[item.category]} · {item.location}</p>
             <h3><Link href={listingUrl(item)}>{item.title}</Link></h3>
             <p>{item.summary}</p>
+            {item.category === "hotels" && <p>{item.roomCount ? `${item.roomCount} room types` : "Ask about room types"}{item.fromNightlyMinor !== undefined && ` · From PKR ${new Intl.NumberFormat("en-PK").format(item.fromNightlyMinor / 100)} / night`}</p>}
+            <Link className="text-link" href={`/plan?add=${encodeURIComponent(item.id)}`}>Add to trip</Link>
           </article>
         ))}
       </div>

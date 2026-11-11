@@ -1,6 +1,8 @@
 # GoChitral build guide for Codex
 AI tourist guidance and itinerary planning for Chitral
 
+Current project choices: Prisma manages PostgreSQL hosted by Supabase. Auth.js handles authentication. Cloudflare R2 stores hotel photos privately, with public access only after admin approval. These user-approved choices replace older provider-specific steps below. Prefer the existing architecture and simple working approaches.
+
 Build GoChitral one working module at a time. A visitor should be able to discover a real place in Chitral, plan a day around it, save the trip, request a guide and track the decision. Hotel managers maintain their listings. Administrators manage the information that travellers see.
 
 ## Start here
@@ -9,7 +11,7 @@ Keep this Markdown file at `docs/GoChitral_Build_Guide.md` in the project. Give 
 > Read the GoChitral build guide and the repository’s AGENTS.md. Work on Module 00 only. Inspect the existing files first. Tell me which prerequisites are present and give me the Windows steps for anything missing. Complete the authorized setup, run its checks and show me the result. Stop before Module 01.
 
 ## Brand assets
-Use **GoChitral** with this capitalization. Use the supplied flowing G and wordmark at `public/brand/gochitral-logo.png`. Preserve its proportions and original artwork. Define Aubergine `#392F48` for primary text and controls, and Pearl `#F5F2F6` for surfaces and inverse text. Pair status colors with words or icons. Use the mark as a home link with the accessible name “GoChitral home”.
+Use **GoChitral** with this capitalization. Use the supplied flowing G and wordmark at `public/brand/gochitral-logo.png`. Preserve its proportions and original artwork. Follow the user's 60/30/10 visual balance: Pearl `#F5F2F6` for dominant surfaces (60%), Aubergine `#392F48` for structure, primary text and controls (30%), and Terracotta `#9A4A2F` for accents and key actions (10%). Treat the proportions as a visual guide, excluding photographs. Pair status colors with words or icons. Use the mark as a home link with the accessible name “GoChitral home”.
 
 [Open the supplied GoChitral logo](https://chatgpt.com/library?file_id=libfile_8a39542ce28c81919059dd464708825a&account_id=personal)
 

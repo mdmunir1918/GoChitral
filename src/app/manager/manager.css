@@ -1,0 +1,25 @@
+.manager-page { max-width: 60rem; padding-block: 2.5rem 4rem; }
+.manager-page h1 { font-size: clamp(2.5rem, 5vw, 4rem); margin-block: 1rem; }
+.manager-page h2 { margin-block: 1.3rem .7rem; font: 1.7rem/1.3 var(--serif); }
+.manager-page p { line-height: 1.6; }
+.manager-links, .hotel-tabs { display: flex; flex-wrap: wrap; gap: 1rem; margin-block: 1.2rem; }
+.manager-page button { min-height: 44px; padding: .65rem 1rem; background: var(--aubergine); color: var(--pearl); border-radius: .3rem; cursor: pointer; }
+.manager-page button:disabled { opacity: .6; cursor: not-allowed; }
+.manager-page button[value=submit], .manager-page .photo-upload-button { background: var(--terracotta); }
+.hotel-tabs button { background: transparent; color: var(--aubergine); border: 1px solid var(--rule); }
+.hotel-tabs button[aria-current] { background: var(--aubergine); color: var(--pearl); }
+.hotel-editor fieldset { border: 0; }
+.hotel-fields, .hotel-room-editor { display: grid; gap: 1rem; }
+.hotel-fields[hidden], .hotel-editor [hidden], .hotel-photos[hidden] { display: none; }
+.hotel-editor label, .hotel-photos > label { display: grid; gap: .4rem; margin-block: .7rem; font-weight: 600; }
+.hotel-editor input, .hotel-editor select, .hotel-editor textarea, .hotel-photos input[type=file] { width: 100%; padding: .7rem; background: var(--surface); border: 1px solid var(--rule); border-radius: .3rem; font-weight: 400; }
+.hotel-check { display: flex !important; align-items: center; gap: .6rem; }
+.hotel-check input { width: 1.2rem; height: 1.2rem; }
+.hotel-room-editor, .hotel-empty, .hotel-list article { padding: 1.2rem; border: 1px solid var(--rule); margin-block: 1rem; border-radius: .4rem; }
+.hotel-notice { border-left: 3px solid var(--terracotta); padding: .7rem 1rem; margin-block: 1rem; }
+.hotel-photo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: 1rem; margin-block: 1rem; }
+.hotel-photo-grid img { width: 100%; height: auto; display: block; margin-bottom: .5rem; }
+.hotel-overview { margin-top: 1.5rem; }
+.hotel-amenities { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; padding-left: 1rem; }
+.hotel-room-list { display: grid; gap: 1rem; margin-block: 1rem; }
+.hotel-room-list article { border: 1px solid var(--rule); padding: 1rem; border-radius: .3rem; }

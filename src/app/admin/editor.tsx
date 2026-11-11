@@ -25,7 +25,7 @@ export function ListingEditor(props: Props) {
 
   function field(name: keyof ListingContent, label: string, maxLength: number, multiline = false) {
     const control = {
-      id: name, name, value: content[name],
+      id: name, name, value: content[name] ?? "",
       onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setContent({ ...content, [name]: event.target.value }),
       maxLength,
     };
@@ -76,6 +76,10 @@ export function ListingEditor(props: Props) {
       {field("sourceUrl", "Information source URL (HTTPS)", 500)}
       {field("reviewed", "Information reviewed on", 10)}
       {field("contactUrl", "Public contact website (HTTPS, optional)", 500)}
+      {(content.category === "activities" || content.category === "guides") && <>
+        {field("servicePrice", content.category === "activities" ? "Price per person (PKR, optional)" : "Estimated guide fee per group per day (PKR, optional)", 11)}
+        <p>Leave blank if the price is unknown. Enter 0 only when the service is free.</p>
+      </>}
       <div className="coordinate-fields">
         {field("latitude", "Latitude (optional)", 30)}
         {field("longitude", "Longitude (optional)", 30)}
@@ -83,6 +87,15 @@ export function ListingEditor(props: Props) {
       {content.category === "guides" && <label htmlFor="evidence">Private credential review evidence
         <textarea id="evidence" name="evidence" rows={3} maxLength={10000} value={evidence} onChange={(event) => setEvidence(event.target.value)} />
       </label>}
+      {content.category === "guides" && <>
+        <p>Public guide profile details. Separate list items with commas. Keep private evidence in the field above.</p>
+        {field("guideLanguages", "Languages", 500)}
+        {field("guideExpertise", "Expertise", 1000)}
+        {field("guideAreasServed", "Areas served", 500)}
+        {field("guideCredentialSummary", "Public credential summary", 1000, true)}
+        <input type="hidden" name="guidePricingUnit" value="per_group_day" />
+        <p>Guide estimate unit · per group per service day</p>
+      </>}
       {content.category !== "guides" && <input name="evidence" type="hidden" value="" />}
       <label htmlFor="reason">Reason for this change
         <textarea id="reason" name="reason" rows={2} maxLength={1000} required value={reason} onChange={(event) => setReason(event.target.value)} />

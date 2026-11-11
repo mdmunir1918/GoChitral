@@ -4,6 +4,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { catalogue } from "@/features/catalogue/catalogue";
 import { categoryLabels, listingUrl } from "@/features/catalogue/types";
+import { readHotelOverview } from "@/features/catalogue/database";
+import { HotelOverview } from "@/features/hotels/overview";
+import { session, userDatabase } from "@/lib/auth/session";
+import { GuideRequestForm } from "./guide-request-form";
+import { MapDrawer } from "@/features/maps/map-drawer";
+import { AssistantDrawer } from "@/features/recommendations/assistant-drawer";
 import "./detail.css";
 
 type Props = PageProps<"/[category]/[slug]">;
@@ -23,6 +29,10 @@ export default async function ListingPage({ params }: Props) {
   if (!detail) notFound();
   const { item, related } = detail;
   const photo = item.photo;
+  const hotel = item.category === "hotels" ? await readHotelOverview(item.id) : null;
+  const identity = item.category === "guides" ? await session() : null;
+  const trips = identity?.account.role === "tourist" ? await userDatabase(identity, tx => tx.trip.findMany({ orderBy: { updatedAt: "desc" }, take: 50,
+    select: { id: true, title: true, startDate: true, endDate: true } })) : [];
   const reviewed = new Intl.DateTimeFormat("en-GB", { dateStyle: "long", timeZone: "UTC" }).format(new Date(item.reviewed));
   return (
     <article className="frame listing-page">
@@ -32,13 +42,29 @@ export default async function ListingPage({ params }: Props) {
           <p className="listing-location">{categoryLabels[item.category]} · {item.location}</p>
           <h1>{item.title}</h1>
           <p className="detail-intro">{item.summary}</p>
+          <p><Link className="browse-link" href={`/plan?add=${encodeURIComponent(item.id)}`}>Add to trip →</Link></p>
+          <MapDrawer label="Open map and route notes" stops={[{ id: item.id, title: item.title, location: item.location,
+            latitude: item.latitude, longitude: item.longitude, visitorNote: item.visitorNote, reviewed: item.reviewed }]} />
+          <AssistantDrawer contextListingId={item.id} />
+          {(item.category === "activities" || item.category === "guides") && <p>{item.servicePriceMinor == null ? "Price unknown" : item.servicePriceMinor === 0 ? "Free" : `PKR ${new Intl.NumberFormat("en-PK", { minimumFractionDigits: 2 }).format(item.servicePriceMinor / 100)}`} · {item.category === "activities" ? "per person" : "per group per day · estimated"}</p>}
+          {item.category === "guides" && item.guideProfile && <section className="guide-profile" aria-label="Guide profile">
+            <h2>Guide profile</h2><p><strong>Languages</strong> · {item.guideProfile.languages.join(", ")}</p>
+            <p><strong>Expertise</strong> · {item.guideProfile.expertise.join(", ")}</p><p><strong>Areas served</strong> · {item.guideProfile.areasServed.join(", ")}</p>
+            <p><strong>Credentials</strong> · {item.guideProfile.credentialSummary}</p>
+            <p><strong>Pricing unit</strong> · per group per service day</p>
+          </section>}
+          {item.category === "guides" && (identity?.account.role === "tourist"
+            ? item.guideProfile ? <GuideRequestForm guideId={item.id} trips={trips.map(trip => ({ id: trip.id, title: trip.title, start: trip.startDate.toISOString().slice(0,10), end: trip.endDate.toISOString().slice(0,10) }))} /> : <p>Requests are not open for this guide yet.</p>
+            : identity ? <p>Use a tourist account to request a guide.</p>
+              : <p><Link className="browse-link" href={`/account/sign-in?next=${encodeURIComponent(`/guides/${item.slug}`)}`}>Sign in as a tourist to request this guide →</Link></p>)}
         </header>
         <figure>
           <Image src={photo.src} width={photo.width} height={photo.height} alt={photo.alt}
+            unoptimized={photo.license === "owner"}
             sizes="(max-width: 768px) 90vw, 47vw" preload />
           <figcaption>
             <span>{photo.caption}</span>
-            <span className="credit"><a href={photo.original}>{photo.author}</a> · <a href={`https://creativecommons.org/licenses/by-sa/${photo.license}/`}>CC BY-SA {photo.license}</a></span>
+            {photo.license === "owner" ? <span className="credit">Photo supplied by {photo.author}</span> : <span className="credit"><a href={photo.original}>{photo.author}</a> · <a href={`https://creativecommons.org/licenses/by-sa/${photo.license}/`}>CC BY-SA {photo.license}</a></span>}
           </figcaption>
         </figure>
         <div className="visitor-details">
@@ -53,6 +79,9 @@ export default async function ListingPage({ params }: Props) {
           </p>
         </div>
       </div>
+      {hotel && <><HotelOverview amenities={hotel.amenities} rooms={hotel.rooms} />
+        {hotel.photos.length > 1 && <section><h2>Hotel photos</h2><div className="public-hotel-photos">{hotel.photos.slice(1).map((p) => <Image unoptimized key={p.id} src={`/api/hotel-photos/${p.id}`} width={p.width} height={p.height} alt={`${item.title} photo`} sizes="(max-width: 768px) 90vw, 30vw" />)}</div></section>}
+      </>}
       {related.length > 0 && <section className="related-listings">
         <h2>More in {item.location}</h2>
         <ul>{related.map((record) => <li key={record.id}>

@@ -1,0 +1,13 @@
+.knowledge-result { padding: .8rem 1rem; border-left: 3px solid var(--terracotta); background: var(--pearl); }
+.knowledge-new, .knowledge-rule { margin-block: 1rem; border: 1px solid var(--rule); border-radius: .5rem; background: var(--surface); padding: 1rem; }
+.knowledge-new > summary, .knowledge-rule > summary { cursor: pointer; font-weight: 700; }
+.knowledge-rules { display: grid; gap: .75rem; }
+.knowledge-form { display: grid; gap: .9rem; margin-block: 1rem; }
+.knowledge-form label { display: grid; gap: .35rem; font-weight: 600; }
+.knowledge-form small { color: var(--muted); font-weight: 400; }
+.knowledge-form input, .knowledge-form textarea { width: 100%; min-height: 2.7rem; padding: .65rem; border: 1px solid var(--rule); border-radius: .25rem; background: var(--pearl); color: var(--aubergine); }
+.knowledge-form textarea { min-height: 6rem; resize: vertical; }
+.knowledge-form-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.knowledge-form-actions { display: flex; flex-wrap: wrap; gap: .65rem; }
+.knowledge-form-actions button { min-height: 44px; padding: .6rem .9rem; }
+@media (max-width: 40rem) { .knowledge-form-pair { grid-template-columns: 1fr; } }

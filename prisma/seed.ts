@@ -10,7 +10,8 @@ const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: proc
 async function seed() {
   await prisma.$transaction(async (tx) => {
     for (const [displayOrder, item] of fixtures.entries()) {
-      const { photo, source, destinationId, ...fields } = item;
+      const { photo, source, destinationId, guideProfile: _guideProfile, ...fields } = item;
+      void _guideProfile;
       const photoId = photo.src;
       await tx.media.upsert({ where: { id: photoId }, create: { id: photoId, ...photo }, update: photo });
       const data = {

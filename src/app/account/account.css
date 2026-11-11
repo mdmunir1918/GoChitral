@@ -2,9 +2,14 @@
 .account-page h1 { font-size: clamp(2.8rem, 6vw, 4rem); margin-bottom: 1.5rem; }
 .account-page form { display: grid; gap: 1rem; margin-block: 1.5rem; }
 .account-page label { display: grid; gap: .4rem; font-weight: 600; }
-.account-page input, .account-page select { width: 100%; padding: .7rem; border: 1px solid var(--rule); border-radius: .25rem; background: white; }
+.account-page input, .account-page select { width: 100%; padding: .7rem; border: 1px solid var(--rule); border-radius: .25rem; background: var(--surface); }
 .account-page button { width: fit-content; min-height: 44px; padding: .65rem 1.2rem; background: var(--aubergine); color: var(--pearl); border-radius: .25rem; cursor: pointer; }
 .account-links { display: flex; flex-wrap: wrap; gap: 1rem; margin-block: 1.5rem; }
 .account-page p { line-height: 1.6; }
-.account-page .auth-message { border-left: 3px solid var(--aubergine); padding: .5rem 1rem; margin-block: 1rem; }
+.account-page .auth-message { border-left: 3px solid var(--terracotta); padding: .5rem 1rem; margin-block: 1rem; }
 .mfa-secret { overflow-wrap: anywhere; }
+.password-field { display: grid; gap: .4rem; }
+.password-input { position: relative; }
+.password-input input { padding-right: 3.25rem; }
+.account-page .password-toggle { position: absolute; top: 0; right: 0; bottom: 0; width: 2.75rem; padding: 0; display: grid; place-items: center; background: transparent; color: var(--aubergine); }
+.account-page button:disabled { opacity: .65; cursor: wait; }

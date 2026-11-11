@@ -14,27 +14,46 @@
     "db:status": "prisma migrate status",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
+    "db:seed-hotels": "node --conditions=react-server --import tsx prisma/seed-demo-hotels.ts",
     "db:verify": "tsx prisma/verify.ts",
     "auth:verify": "tsx prisma/verify-auth.ts",
     "auth:admin": "tsx prisma/provision-admin.ts",
-    "publishing:verify": "tsx prisma/verify-publishing.ts"
+    "publishing:verify": "tsx prisma/verify-publishing.ts",
+    "auth:flows": "node --conditions=react-server --import tsx prisma/verify-auth-flows.ts",
+    "hotels:verify": "tsx prisma/verify-hotels.ts",
+    "planner:verify": "tsx prisma/verify-planner.ts",
+    "planner:db": "node --conditions=react-server --import tsx prisma/verify-planner-db.ts",
+    "trips:verify": "node --conditions=react-server --import tsx prisma/verify-trips.ts",
+    "guides:verify": "node --conditions=react-server --import tsx prisma/verify-guide-requests.ts",
+    "admin:verify": "node --conditions=react-server --import tsx prisma/verify-admin-dashboard.ts",
+    "maps:verify": "node --import tsx src/features/maps/verify-route.ts",
+    "recommendations:verify": "node --import tsx src/features/recommendations/verify.ts",
+    "db:seed-guide": "node --conditions=react-server --import tsx prisma/seed-demo-guide.ts",
+    "db:seed-guides": "node --conditions=react-server --import tsx prisma/seed-demo-guide.ts",
+    "media:cleanup": "node --conditions=react-server --import tsx prisma/cleanup-hotel-photos.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1164.0",
+    "@aws-sdk/s3-request-presigner": "^3.1164.0",
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
-    "@supabase/ssr": "^0.12.7",
-    "@supabase/supabase-js": "^2.119.0",
+    "bcryptjs": "^3.0.3",
     "dotenv": "^18.0.10",
     "next": "16.4.5",
+    "next-auth": "^5.0.0-beta.32",
+    "nodemailer": "^10.4.0",
+    "otpauth": "^9.6.0",
     "pg": "^8.23.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "server-only": "^0.0.1",
+    "sharp": "^0.35.5",
     "zod": "^4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^20",
+    "@types/nodemailer": "^8.0.2",
     "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -44,5 +63,8 @@
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5"
+  },
+  "overrides": {
+    "nodemailer": "$nodemailer"
   }
 }

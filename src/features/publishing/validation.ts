@@ -29,10 +29,20 @@ export const contentSchema = z.object({
   contactUrl: httpsUrl,
   latitude: coordinate(-90, 90),
   longitude: coordinate(-180, 180),
+  servicePrice: z.string().trim().regex(/^(\d{1,7}(\.\d{1,2})?)?$/, "Enter a nonnegative PKR price with up to two decimals, or leave it blank.").optional(),
+  guideLanguages: z.string().trim().max(500).default(""),
+  guideExpertise: z.string().trim().max(1000).default(""),
+  guideAreasServed: z.string().trim().max(500).default(""),
+  guideCredentialSummary: z.string().trim().max(1000).default(""),
+  guidePricingUnit: z.literal("per_group_day").default("per_group_day"),
 }).refine((value) => value.category === "destinations" || value.destinationId !== "", {
   message: "Choose a parent destination.", path: ["destinationId"],
 }).refine((value) => Boolean(value.latitude) === Boolean(value.longitude), {
   message: "Supply both coordinates together.", path: ["latitude"],
+}).refine((value) => value.category !== "guides" || [value.guideLanguages, value.guideExpertise, value.guideAreasServed].every((items) => {
+  const list = items.split(",").map(item => item.trim()).filter(Boolean); return list.length >= 1 && list.length <= 20;
+}) && Boolean(value.guideCredentialSummary), {
+  message: "Add guide languages, expertise, service area, and a public credential summary before publishing.", path: ["guideLanguages"],
 });
 
 export type ListingContent = z.infer<typeof contentSchema>;
@@ -63,5 +73,16 @@ export function listingFields(content: ListingContent) {
     contactUrl: content.contactUrl || null,
     latitude: content.latitude === "" ? null : Number(content.latitude),
     longitude: content.longitude === "" ? null : Number(content.longitude),
+    servicePriceMinor: ["activities", "guides"].includes(content.category) && content.servicePrice ? Math.round(Number(content.servicePrice) * 100) : null,
+  };
+}
+
+export function guideProfileFields(content: ListingContent) {
+  return {
+    languages: content.guideLanguages.split(",").map(value => value.trim()).filter(Boolean),
+    expertise: content.guideExpertise.split(",").map(value => value.trim()).filter(Boolean),
+    areasServed: content.guideAreasServed.split(",").map(value => value.trim()).filter(Boolean),
+    credentialSummary: content.guideCredentialSummary,
+    pricingUnit: content.guidePricingUnit,
   };
 }

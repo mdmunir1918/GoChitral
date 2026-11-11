@@ -23,19 +23,21 @@ async function verify() {
   assert.equal(returnPath("/\\external.example"), "/account");
   assert.equal(returnPath("https://external.example"), "/account");
   assert.equal(returnPath("/explore?q=Bumburet"), "/explore?q=Bumburet");
+  assert.equal(returnPath("/guides/sample-bumburet-guide"), "/guides/sample-bumburet-guide");
+  assert.equal(returnPath("/my-trips/requests/GC-A1B2C3D4"), "/my-trips/requests/GC-A1B2C3D4");
   await db.connect();
   await db.query("BEGIN");
   try {
     const people = [
-      { id: randomUUID(), session: randomUUID(), metadata: "administrator", role: "tourist" },
-      { id: randomUUID(), session: randomUUID(), metadata: "tourist", role: "tourist" },
-      { id: randomUUID(), session: randomUUID(), metadata: "manager", role: "manager" },
-      { id: randomUUID(), session: randomUUID(), metadata: "manager", role: "manager" },
+      { id: randomUUID(), session: randomUUID(), role: "tourist" },
+      { id: randomUUID(), session: randomUUID(), role: "tourist" },
+      { id: randomUUID(), session: randomUUID(), role: "manager" },
+      { id: randomUUID(), session: randomUUID(), role: "manager" },
     ];
     for (const person of people) {
-      await db.query("INSERT INTO auth.users (id, email, raw_user_meta_data) VALUES ($1, $2, $3)",
-        [person.id, `fixture-${person.id}@example.invalid`, JSON.stringify({ account_type: person.metadata })]);
-      await db.query("INSERT INTO auth.sessions (id, user_id) VALUES ($1, $2)", [person.session, person.id]);
+      await db.query('INSERT INTO public."Account" (id, email, role) VALUES ($1, $2, $3::"AccountRole")',
+        [person.id, `fixture-${person.id}@example.invalid`, person.role]);
+      await db.query(`INSERT INTO public."AuthSession" (id, "accountId", "expiresAt") VALUES ($1, $2, now() + interval '1 day')`, [person.session, person.id]);
     }
     const columns = await db.query(`SELECT column_name FROM information_schema.columns
       WHERE table_schema = 'public' AND table_name = 'Listing' ORDER BY ordinal_position`);
@@ -60,11 +62,15 @@ async function verify() {
       const hotels = await db.query('SELECT id FROM "Listing" WHERE id LIKE \'verify-manager-%\' ORDER BY id');
       assert.deepEqual(hotels.rows.map((row) => row.id), index >= 2 ? [`verify-manager-${index - 2}`] : []);
       await denied('UPDATE "Account" SET role = \'administrator\'');
+      await denied('SELECT * FROM "AuthCredential"');
+      await denied('SELECT * FROM "AuthToken"');
+      await denied('SELECT * FROM "AuthSession"');
+      if (index === 0) await denied("SELECT public.gochitral_auth_success(repeat('a', 64))");
       assert.equal((await db.query('UPDATE "Listing" SET status = \'published\'')).rowCount, 0);
       await db.query("RESET ROLE");
     }
     const person = people[2];
-    await db.query("DELETE FROM auth.sessions WHERE id = $1", [person.session]);
+    await db.query('DELETE FROM public."AuthSession" WHERE id = $1', [person.session]);
     await db.query("SET LOCAL ROLE authenticated");
     await db.query("SELECT set_config('request.jwt.claims', $1, true)", [
       JSON.stringify({ sub: person.id, role: "authenticated", session_id: person.session, aal: "aal1" }),

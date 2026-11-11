@@ -1,3 +1,228 @@
+# Module 11 · Recommendations and reviewed local answers
+
+**Implemented on 11 November 2026 and ready for user review.** Module 10 is complete and was reviewed. The Module 11 workflow uses a deterministic ranking function and answers only from administrator-reviewed, unexpired rules with HTTPS sources. No hosted model key is needed. No knowledge answers are seeded; add reviewed source-backed entries at `/admin/knowledge` before expecting answers.
+
+## Scope
+
+- Filter recommendations to published choices for the selected destination, calculate interest/price/distance signals with missing-signal disclosure, and retain stable catalogue order when no signals are available.
+- Add administrator-managed knowledge topics with terms, approved answer, secure source, review/expiry dates and related published listing IDs. Add answer drawer on listing details and planner.
+- Test match, stable tie, missing price, no eligible options, expired advice, ambiguity and a request to expose another visitor's trip. Enforce admin authorization and public read-only current rules in PostgreSQL.
+
+## Work and observed checks
+
+- Added `/recommendations` with destination and interest filters, optional PKR price target, stable tie order, published-destination filtering, score explanations and explicit missing-price/distance notices. The 50/30/20 score is pure TypeScript; missing signals are omitted and remaining weights are renormalized. Historical popularity/case signals remain omitted until Module 12 supplies suitable aggregates.
+- Added an administrator knowledge editor with draft/publish/retire states, optimistic version checks, HTTPS source, terms, reviewed/expiry dates, published-related-listing validation and an admin-only change audit. Listing details and the planner include a local-question drawer. The answer endpoint uses deterministic term matching, 300-character questions, same-origin checks, 4 KiB body limit, per-process rate cap, no-store responses and no external model. Unknown, ambiguous, expired or private-trip requests fall back to current related topics; raw questions are not stored.
+- Prisma schema validation and client generation passed. `recommendations:verify` passed the 0.85 weighted example, stable ties, missing price and weight renormalization, destination filter, no-signal order, exact answer, expired answer, ambiguous answer and private-trip fallback. TypeScript and targeted ESLint passed. Browser review loaded `/recommendations` and verified destination/interest/price query parameters produce scored, explained suggestions.
+- The first knowledge migration is applied to the connected Supabase project with RLS enabled. Public roles inherit the `gochitral_public` reader role, which is restricted by policy to published, unexpired rules; audit rows have admin-only policies. The knowledge table currently has zero rows. Existing security-advisor findings are unrelated pre-existing SECURITY DEFINER functions and tables; this migration added no such function.
+- Applied follow-up migration `202611110002_knowledge_public_privacy` to Supabase and recorded its checksum in Prisma migration history. The actor column is nullable, and actor identity stays in the admin-only audit table. Live catalog inspection confirms RLS is enabled on both knowledge tables: public reads require a published, unexpired rule; rule edits and audit reads are administrator-only. No temporary test rows or accounts remain. The earlier transactional SQL simulation was not retained as a final acceptance result; verify creating and editing a rule in an administrator session and the public answer flow during review.
+- Retry checks: Prisma schema validation, `recommendations:verify`, TypeScript (`tsc --noEmit`) and targeted ESLint passed. Browser review confirmed `/recommendations` renders and query filters affect the displayed scores. Review `/recommendations` and `/admin/knowledge`; Module 12 has not started.
+
+---
+
+# Module 10 · Maps and route estimates
+
+**Implemented on 10 November 2026 and ready for user review.** Open a located destination such as `/destinations/bumburet-valley` or `/plan`, then use its map button. The OSM standard raster tiles are best-effort and stay on-demand; OSRM's public endpoint is a demo with no uptime promise and a one-request-per-second limit. See [map and routing notes](maps.md).
+
+## Scope
+
+- Add a map drawer that loads its map renderer and visible tiles only after opening. Keep names and dated visitor notes available as text if map tiles are blocked.
+- Add a fixed-host, driving-only route adapter with validated local-region coordinates, bounded request size, timeouts and a strict per-process/provider quota. Route estimates are estimates, not live road status.
+- Test the single-stop path, invalid coordinates, successful route parsing, unreachable route, timeout and quota exhaustion. Keep the existing listing/planner flow usable when routing fails.
+
+## Implementation and observed checks
+
+- Added a lazy-loaded map drawer to listing pages and each saved planner day. It shows mapped stops, their names and visitor notes, visible OpenStreetMap attribution, manual pan/zoom and an optional route estimate. Unmapped stops remain in the text list; selections over eight stops are explained and remain readable. No tile preload, offline storage or untrusted provider URL is used.
+- Added three reviewed coordinates for Bumburet Valley, Chitral town and Kalasha Dur Museum. The connected database confirms all three values. Verified coordinate references and provider terms are recorded in [map and routing notes](maps.md).
+- Added `POST /api/routes/estimate` with same-origin and JSON checks, streamed 8 KiB body limit, Pakistan-region coordinate validation, maximum eight stops, fixed OSRM driving host, response size/schema bounds, 7-second provider timeout, and per-process one-call-per-1.1-second plus five-per-client-per-minute limits. One stop is handled locally without a provider request. Error responses leave selected place order intact.
+- `maps:verify` passed coordinate bounds, stop limits, fixed provider host and coordinate order, single-stop no-call, successful result parsing, no-route, timeout, malformed/failed provider responses, and global/client quota checks. TypeScript passed. Targeted ESLint passed with one expected warning for native `<img>` map tiles; Next image optimization is not appropriate for externally hosted map tiles. The initial check caught a React state-in-effect lint error and two inferred `any` errors; those were fixed and checks rerun successfully.
+- Browser review confirmed the public guide directory still renders ten profiles and the Bumburet listing page renders its map trigger and coordinates. The map drawer opening and live external route request could not be confirmed in this run: the shell could not connect to the local app server, and the existing browser view did not show an opened dialog after activation. No live OSRM uptime claim is made. Review the drawer in the running app before starting Module 11.
+- A missing request body now produces the normal invalid-JSON response rather than the misleading oversized-body response. No package was added; npm DNS was unavailable and the custom renderer keeps the current dependency set unchanged.
+
+---
+
+# Module 09 · Guide requests
+
+**Completed on 10 November 2026 and ready for user review.** Review the public directory at http://127.0.0.1:3000/guides, the fictional sample at `/guides/sample-bumburet-guide`, and the administrator queue at `/admin/guide-requests`.
+
+## Implementation
+
+- Added public guide profiles to the existing listing and publication flow. Administrators can publish a guide's languages, expertise, service areas, public credential summary and fixed per-group/per-day price. Private verification evidence stays private. Added a clearly fictional sample profile; it creates no accounts or requests.
+- Tourists can request a guide for an owned saved trip and inclusive service dates. Server checks the session role, listing/profile publication, saved-trip ownership and date bounds. Requests snapshot the displayed guide name and price. An owner-scoped idempotency key makes safe retries return the original request.
+- Added private request status pages and a reasoned admin decision queue. Only pending requests can be confirmed or declined; each decision is audited. Database locking prevents overlapping confirmed bookings for the same guide, while adjacent date ranges remain available. Editing a saved trip cannot remove dates with pending or confirmed guide requests.
+- Applied Prisma migrations 202611100010 through 202611100012 after rollback rehearsals. Row policies restrict owner/admin access; public catalogue reads expose only published guide profiles. Guide request details remain private and uncached.
+- Added nine more fictional guide profiles for a total of ten published profiles. Each new title, summary, credentials note and visitor note says the profile is demo data; no user accounts or guide requests were created. The reusable idempotent seed is `prisma/seed-demo-guide.ts` (`db:seed-guides`).
+- Added an administrator dashboard with total account/trip/listing counts, account roles, listing categories and statuses, pending revisions, hotel/guide queue counts, recent moderation totals, review shortcuts and a role-permissions table. A fixed aggregate-only function in the unexposed `gochitral_private` schema supplies global counts after checking the current administrator session. No emails, credentials or trip contents are returned.
+
+## Observed checks and repairs
+
+- `guides:verify` passed idempotent retries, ownership/date bounds, owner/admin isolation, private reference handling, concurrent overlapping confirmation, adjacent dates, pending-only decisions, audit history, declined history and the eight-per-15-minute limit. Temporary test requests, profile, trips, sessions, accounts and rate-limit rows were removed.
+- `planner:verify`, `auth:verify`, `publishing:verify` and `trips:verify` passed after adding guide-related compatibility coverage. `db:validate`, Prisma client generation, TypeScript checking and source lint passed. The demo seed ran and the sample profile was added without creating user accounts or bookings.
+- Admin dashboard migration 202611100013 was applied to the connected GoChitral Supabase project and recorded in Prisma migration history. A temporary administrator session inside a rolled-back SQL transaction received metrics; a tourist was denied. Supabase grants confirm the anonymous role cannot access the private schema/function. TypeScript and targeted ESLint checks passed. The sandbox could not reach the direct database URL for the `admin:verify`/`guides:verify` CLI runs (Prisma P1001); equivalent dashboard authorization and live guide counts were checked through the connected Supabase tool.
+- The live `/guides` page returned HTTP content with all ten profiles. The first open browser tab showed an old Internal Server Error state; opening the current `127.0.0.1:3000` app loaded the directory successfully. `/admin` correctly returned Access denied to the current non-administrator browser session. The successful administrator dashboard screen still needs review in an administrator session.
+- The production build could not complete in this OneDrive workspace: Next.js returned Windows `EPERM` while creating/deleting generated `.next` output. A later Prisma status check stalled at the hosted schema-engine step. Migration deployment and the guide database acceptance check had already succeeded. Browser acceptance was not completed in this final run.
+
+---
+
+# Module 08 · Saved trips and printable summaries
+
+**Completed on 10 November 2026 and ready for user review.** Module 09 has not started. Review at http://127.0.0.1:3000/my-trips after signing in. [Saved-trip review steps](saved-trips.md) cover guest sign-in, retry, edits and browser printing.
+
+## Implementation
+
+- Added private Trip, TripDay, TripItem and TripSave receipt tables through Prisma migration 202611100009_saved_trips. Migration rehearsal rolled back successfully, then deployment and generated-client validation passed. Owner RLS covers parents and children, one day per trip/date is enforced, and the composite day/trip foreign key prevents cross-trip child links. Titles, quantities, units and integer price snapshots survive catalogue withdrawal.
+- Save itinerary retains the guest draft through sign-in, refreshes and validates published data, then saves the full itinerary and a unique owner/save-key receipt in one transaction. Concurrent retries use a transaction lock and durable receipt; lost-response retries return the original trip. Updates check the expected revision and atomically replace days/items. Current owner identity comes from Auth.js. Confirmed success clears only the matching device draft; timeouts/conflicts preserve it.
+- Added My trips, detail, edit and independently authorized print routes. New accounts see Plan your first trip. A saved trip's detail, edit and print load a consistent database snapshot, mark withdrawn choices unavailable, retain their saved titles/estimates, and offer replacement through the existing planner. Edit drafts use a separate per-trip device key. Guide choices display Not requested; actual requests remain Module 09.
+- Private responses/exports are private/no-store and excluded from indexing. Trip data is not sent to external analytics, routing or document services. Print / Save as PDF uses the browser, with escaped text, all calendar days, price units, subtotal, unknown costs and guide status.
+
+## Observed checks and repairs
+
+- trips:verify passed the PKR snapshots, forced rollback before commit, post-commit replay, concurrent retries, optimistic edit conflict, owner/admin/public isolation, day uniqueness and composite foreign key, immutable identity, withdrawn title/price retention and revoked sessions. Its temporary accounts, sessions, trips and catalogue fixtures were removed. planner:verify and auth:verify passed.
+- Browser testing confirmed guest sign-in recovery, a simulated lost response after the save committed, same-key replay returning one trip, clearing the confirmed guest draft, My trips reopening, escaped titles, owner-only detail/edit/print, stale-tab edit rejection, explicit reload, withdrawn snapshots, empty state and 360/641px layouts. It caught an early loading boundary returning HTTP 200 for denied private pages; removing that boundary restored correct not-found/redirect responses before rendering. Cross-user content denial was checked again.
+- Reloading a saved version now clears stale conflict notices and resets the review step. Discarding an edit draft returns to the saved itinerary; blocked browser storage does not turn an edit into a new trip. Print spacing was tightened after visual review found a short itinerary wasting a mostly empty subtotal page.
+- Build, standalone typecheck and lint passed. A Supabase advisor request was unavailable because the connected tool required a link_id; no advisor scan result is claimed. Owner/public/session policies were verified directly by database and browser tests.
+- The final browser rerun passed after the fixes, including removal of the stale conflict warning after reload. The actual browser PDF was rendered with Poppler and visually inspected; its three calendar days, PKR 15,000 subtotal, unknown cost and guide status now fit legibly on one A4 page. The mobile saved-trip screenshot was also visually inspected. All browser test trips, sessions and temporary catalogue records were removed. Existing accounts and demo hotels remain. The final app is running at http://127.0.0.1:3000.
+
+---
+
+# Module 07 · Day planner and budget
+
+**Completed on 9 November 2026 and ready for user review.** Module 08 has not started. Open http://127.0.0.1:3000/plan as a guest. [Planner review steps and price units](planner.md) explain the three steps and administrator price fields.
+
+## Implementation
+
+- Added Trip details, Plan your days and Review budget at /plan, plus navigation/account links and Add to trip from Explore and listing pages. Guests choose dates, people, destinations, budget, hotel rooms, activities, stops and an optional guide. Add/replace/remove and quantity editing keep valid choices available after a failed check.
+- Calendar days use date-only arithmetic and Asia/Karachi labels. Hotel rows charge the current room rate × rooms × one selected overnight date, with zero nights on checkout day. Unselected nights are explicitly excluded. Activities charge per participant; guide estimates charge once per group per service day. Unknown costs are separate from free services and excluded from the known subtotal. Review reloads current published records and marks unit prices changed since the last review.
+- Added nullable nonnegative activity/guide prices through Prisma migration 202611090008_planner_prices. Rehearsal rolled back successfully, migration deployed, and the generated client/build include the field. Administrator price edits follow the existing draft/publish/audit workflow. Existing prices were left unknown rather than invented; hotel prices remain in published rooms. Existing RLS and parent-suspension policies apply to the planner's public-only query.
+- Versioned device drafts expire after 24 hours and contain only planning settings, item/room IDs, quantities and previous unit prices. Drafts can be discarded explicitly. Browser storage and submitted snapshots/totals are untrusted. Review recomputes prices, checks publication/capacity/dates/destination membership and bounds days, people, item count and streamed body size. Responses use private/no-store. No account trip, export, guide request or routing integration was added.
+
+## Observed checks and repairs
+
+- planner:verify passed the PKR 15,000 worked example, same-day zero nights, month and leap-year boundaries, unknown versus free, room capacity, guide once/day, date impacts, hidden/unavailable IDs, tampered/stale price snapshots, limits and draft expiry/restore.
+- planner:db passed published price reads, private draft price isolation, approved changes, refreshed quotes and withdrawal in a rolled-back transaction. publishing:verify and hotels:verify passed unchanged authorization/publication/hotel behaviors.
+- Browser testing found an outside-date restored item was removed when continuing without changing dates. Fixed that: unchanged dates preserve the item and expose a removal control; changed dates show affected items and checkout-night changes before confirmation. Added clear text that only selected hotel nights enter the estimate. A first browser attempt timed out finding a destination; a fresh inspection found both public choices, and subsequent full runs progressed. No persistent destination-permission failure was reproduced.
+- The final isolated Chrome run passed the actual 3-day/2-night/2-person PKR 15,000 example, refresh recovery, date confirmation/cancel, capacity failure and repair, current rate changes, simulated 503 price-check recovery without losing choices, outside-date removal, Add to trip, expiry/discard, anonymous API validation, hidden-ID denial, tampering resistance, 64 KB body limit and cross-origin denial. Desktop and 360px planner/budget screens were checked; mobile had no horizontal overflow and screenshots were visually inspected. No browser page errors were reported. Temporary hotel/activity/room records were removed.
+- Production build, standalone typecheck, lint and the final planner calculation checks passed. The final app is running at http://127.0.0.1:3000. No new test account or credentials were needed.
+
+---
+
+# Hotel photos, demo hotels, performance and palette · 9 November 2026
+
+Completed the user's Module 06 follow-up. Module 07 has not started. [Observed results and performance measurements](performance-review.md) record the upload investigation, remaining latency and review links.
+
+Reproduced a successful manager WebP upload before changes (8.797 s); the reported universal failure was not reproduced. Removed the R2 write from the database transaction, increased its storage deadline, and added disabled-button instructions, visible progress, JSON errors and file-selection reset. A real PNG upload (5.265 s), decoded private preview and guest denials passed. The timings use different files and are not a controlled upload speed comparison.
+
+Added ten fictional demo hotels assigned to the retained manager, twenty rooms and ten clearly labelled R2 illustrations through the existing submission/approval services. Existing catalogue/user content was preserved. A repeat seed created zero duplicates. Applied the requested Pearl 60%, Aubergine 30%, Terracotta 10% visual balance across shared pages and workspaces, preserving the logo.
+
+Reduced catalogue reads to one joined query with public RLS and request-local metadata/page deduplication. Reused the current account role already read by Auth.js instead of making another account transaction. Role/session checks remain fresh on each request and private operations retain RLS/activity checks. Added navigation loading feedback. Warm Explore content fell from 2.65 s to around 1.05 s; the measured manager-page median fell from 4.63 s to 2.58 s. Remote database round trips of roughly 0.2 s and cold photo retrieval remain visible. No infrastructure was moved.
+
+Build, typecheck, lint, auth:flows, publishing:verify, hotels:verify and db:verify passed. Browser verification passed upload validation/progress/preview, three-account role access, ten editable demo hotels and mobile overflow checks. Desktop/mobile screenshots were visually inspected. Temporary upload fixtures/objects and captured browser sessions were removed. The rebuilt app runs at http://127.0.0.1:3000. Restaurant functionality does not yet exist; no new category/module was added.
+
+---
+
+# Local administrator sign-in · 9 November 2026
+
+At the user's request, local administrators now sign in with email and password without an authenticator code. The ignored .env sets AUTH_REQUIRE_ADMIN_MFA=false. The app accepts this opt-out only for a loopback APP_ORIGIN; missing settings and non-local origins require MFA. Set the flag to true and restart to restore codes. Existing accounts, passwords and enrolled authenticator secrets remain unchanged. Module 07 has not started.
+
+Updated the server role guard, account links, stale MFA-page redirect, trusted operator provisioning and PostgreSQL admin policy together. Sessions retain their real assurance level; password-only sessions are not marked MFA-verified. Migration 202611090007_optional_admin_mfa is applied. Review instructions explain the setting. An accidental documentation text replacement was repaired, and all three original saved passwords were verified against their unchanged database hashes.
+
+Build, typecheck, lint, auth:flows, publishing:verify and hotels:verify passed. Tests cover local and non-local settings, MFA enforcement when enabled, password-only admin writes with audit records, tourist denial and revoked-session denial. Fresh HTTP sign-ins passed for all three saved accounts: admin opened /admin and /admin/hotels with aal1 and a null database MFA timestamp; tourist and manager received Access denied at /admin. The old MFA URL returned to /account and its account link was hidden. Guest and revoked admin sessions returned to sign-in. Captured HTTP test sessions were removed.
+
+Review: refresh http://127.0.0.1:3000/account/sign-in, use the existing administrator credentials in the ignored docs/development-credentials.local.md, and open /admin. The rebuilt app is running at http://127.0.0.1:3000.
+
+---
+
+# Module 06 · Hotel manager workspace
+
+**Completed on 9 November 2026 and ready for user review.** Module 07 has not started. The user selected Cloudflare for images, enabled R2 and supplied the app's bucket-scoped keys in the ignored .env.
+
+## Review Module 06
+
+Use the retained manager account in the ignored docs/development-credentials.local.md and open http://127.0.0.1:3000/manager/hotels. Create a hotel, add rooms, save a draft, upload a photo and submit for review. Sign in as administrator with email and password for local testing and open http://127.0.0.1:3000/admin/hotels. Review and approve the submission, then open its public link. [Hotel workspace review steps](hotel-workspace.md) include edits, archival, photo setup and cleanup.
+
+## Implementation and checks
+
+- Prisma owns separate private hotel, room and photo drafts. Managers cannot change public content or moderation status. Approval publishes the listing, amenities, active rooms and approved photo visibility atomically using the existing audited publishing service. Current public prices stay unchanged while a manager edits a draft. Archived public rooms keep their stable IDs and last approved prices; trip snapshots remain part of the later trip module.
+- Added manager list/editor routes, tabs that preserve unsaved inputs, a shared public/preview room-and-amenity component, admin review queues, change-request notes and public hotel links. Existing manager landing content was preserved and linked to the new workspace after automatic review rejected an unconditional replacement.
+- Created the private Cloudflare R2 gochitral-media-dev bucket in APAC. The user supplied the scoped S3 access keys; account/bucket values and safe placeholders are in .env/.env.example. Real R2 write/read, signed preview and unsigned-access denial passed. R2 returns HTTP 400 for the unsigned test request. Temporary storage test objects were removed.
+- Uploads check owner, shared attempt limits, actual image signature/decoding, 5 MB input, 20 megapixels and bounded dimensions, then re-encode resized WebP without metadata under generated keys. Processed images are limited to 2 MB, eight active photos per hotel and fifty stored photos per manager. Private previews expire after sixty seconds. Public photo requests require an approved photo and visible hotel/parent. Owner-supplied images retain appropriate attribution rather than a Creative Commons claim.
+- The hotel migration passed a rolled-back rehearsal and deployed successfully. hotels:verify passed two-manager room/photo isolation, immutable ownership/approval/storage fields, photo overwrite denial, eight-photo quota, pending freeze, stale saves, approval, private draft rates, archive retention, suspension and malformed/oversized/dimension-limited image rejection. Fixtures rolled back. publishing:verify, auth:verify and db:verify passed.
+- Automatic approval review blocked cleanup against existing photos. The command now defaults to a dry run; deletion requires an explicit --delete flag. The dry run passed with zero candidates and deleted nothing. Cleanup locks and rechecks each hotel, excluding approved photos and pending submissions.
+- The final Chrome browser run passed manager draft creation, validation feedback for an invalid room on a hidden tab, room edits across tabs, real R2 upload, forged and oversized upload denial, cross-owner editor/photo/upload denial, admin MFA approval, public room/photo reads, draft prices staying private, stale-tab text preservation, public suspension with hotel HTTP 404/photo HTTP 403, and a 360px layout without horizontal overflow. The mobile editor screenshot was visually inspected. Fixed oversized-file feedback, approval confirmation disappearing after revalidation, two-decimal PKR display and hidden-tab native validation blocking form feedback. All browser test hotel records, R2 objects, temporary managers and test sessions were removed. A final count found zero test hotels/temporary managers and the three retained user-review accounts.
+- One acceptance attempt hit a cold sign-in transaction timeout (P2028). A direct health query responded normally at 200 ms, and the warmed retry passed the entire browser flow. This observed hosted-database timeout remains recorded rather than being treated as a hotel permission failure.
+- Final build, standalone type checking and source lint passed. The development server runs at http://127.0.0.1:3000. The guide now records the user's Prisma, Auth.js and Cloudflare R2 choices.
+
+---
+
+# Sign-in speed and eye icon · 9 November 2026
+
+The user confirmed sign-in now works and asked why it is slow, plus an eye icon for password visibility. Measured the running production build before changing the login flow. A warm hosted-database round trip took 218 ms. Three manager login plus Account-page timings were 10.609 s, 8.710 s and 9.378 s.
+
+Removed the redundant proxy database session refresh; private pages and mutations still enforce authentication themselves. Reused the session/MFA state that Auth.js has just validated instead of reading the same session again. Combined the shared rate-limit operation and credential lookup in one transaction. The initial JWT callback now uses the freshly verified account/session returned by Credentials; later requests always revalidate that session in PostgreSQL. Kept password hashing, rate limits, origin checks, database RLS, per-operation session checks and administrator MFA.
+
+Replaced the password visibility text with an inline eye/eye-slash icon inside the input. Kept accessible Show password/Hide password names, keyboard operation and a large click target. The previously prepared pending submit control is now built and shows Signing in… while the request runs.
+
+The final production build measured 7.228 s, 5.226 s and 6.489 s for the same login-plus-Account flow (median 6.489 s versus 9.378 s, about 31 percent lower). The first login includes a cold application database connection. These are local measurements, not a guaranteed response time; hosted-database network latency remains.
+
+Build, standalone type checking, lint, auth:flows, auth:verify and publishing:verify passed. Actual HTTP checks passed tourist/manager role restrictions, administrator MFA with the original cookie (fresh database MFA state), and denied a revoked tourist cookie. HTTP test sessions were removed. The in-app browser verified the eye control changes the input type in both directions, and its desktop layout was visually inspected. No schema change or new module was needed. The final build is running at http://127.0.0.1:3000.
+
+---
+
+# Brave sign-in investigation · 9 November 2026
+
+The user reported the generic failure message while using Brave at http://127.0.0.1:3000 with manager@gochitral.test. Checked all three private saved credentials against the database: account IDs and bcrypt passwords match, confirmation is not required, and the accounts exist. Fresh Chrome sign-ins for tourist and manager both opened /account. The user's Brave failure has not yet been reproduced or explained; requested a retry with clearer feedback.
+
+Separated incorrect-credential errors from temporary service errors and added safe Auth.js error-type/code logging without password, email or token output. Added a Show password control to the existing forms. Normalize surrounding whitespace and case in email addresses while preserving passwords exactly. The private credentials were not changed.
+
+The auth:flows regression passed, including copied-email normalization and existing session, recovery, MFA and limit checks. Build, lint and standalone type checks passed after correcting the logger's Error type guard. In-app browser checks verified password visibility controls and the real incorrect-credential redirect/message. The dummy login counter was removed, and exactly one tourist, manager and administrator remain. The local server is running. Reading the user's Brave window was unavailable because app access timed out. No new module started.
+
+---
+
+# Fresh test accounts · 9 November 2026
+
+At the user's request, removed all six existing application accounts and all three old Supabase Auth accounts. This removed the old stored password hashes, account sessions, confirmation/recovery tokens and MFA factors. Cleared old rate-limit records, the remaining unused provider login flow and old links in the private local outbox. The provider's user, identity, session, refresh-token, MFA-factor, one-time-token and account-audit stores are empty.
+
+Created exactly three fresh test accounts: administrator, tourist and hotel manager. Each has a new random alphanumeric password. The administrator has a new encrypted authenticator setup key and still requires a current code. Their email addresses, passwords and the admin setup key are saved only in the ignored docs/development-credentials.local.md. The old private credentials file was replaced. Existing catalogue content remains available.
+
+Chrome passed sign-in for all three accounts. The tourist Account page and Explore opened, and the manager workspace denied tourist access. The manager's empty hotel workspace opened. The administrator passed MFA and opened the publishing workspace. Removed the browser test sessions and confirmed exactly one account for each role remains. No code change or new module was needed. A separate tourist dashboard has not been built; the current Account page already supports tourist sign-in.
+
+---
+
+# Login and password follow-up · 9 November 2026
+
+The user reported the 15-minute attempt-limit message. The old limiter shared one email bucket across registration, sign-in and recovery and counted successful sign-ins. Cleared the development tourist/manager lockouts, separated the operation buckets and made verified successful sign-ins clear their failed-attempt count. Eight failed attempts still enforce the existing 15-minute limit. Sign-in now displays the specific rate-limit message. Only the trusted auth backend can clear that counter.
+
+New registration and reset passwords now require at least eight characters with a letter and a number. Existing passwords continue to work. The visible hint is exactly “Use at least 8 characters.” The technical maximum remains enforced internally. Updated setup documentation.
+
+The migration passed a rolled-back rehearsal and deployment. auth:flows passed eight-character validation, repeated successful login without lockout, separate operation limits, failed-attempt lockout, confirmation/recovery and revocation checks. An initial standalone test import pulled in the Next.js client runtime; keeping the service error independent of Auth.js fixed that test boundary. A PostgreSQL void return required a non-returning Prisma call; the regression passed after that correction. auth:verify passed and checked that authenticated users cannot invoke the counter-reset helper.
+
+Chrome verified the retained tourist and manager credentials, eight-character registration/sign-in, exact hint at 360px, a cleared successful-login counter and the actual rate-limit error after eight failed attempts. Test accounts, counters and browser test sessions were removed. Build, lint and standalone type checks passed. The app was restarted at http://127.0.0.1:3000. No new module started.
+
+---
+
+# Authentication update · Auth.js
+
+**Completed on 9 November 2026 at the user's request.** This replaces the Module 04 Supabase Auth implementation. Module 06 has not started. The user explicitly chose immediate local sign-in while SMTP is deferred.
+
+## Review the replacement
+
+Open http://127.0.0.1:3000/account/register, create a tourist or manager account, and sign in immediately. Existing development account credentials and the administrator authenticator setup key remain in the ignored docs/development-credentials.local.md. Administrator pages still require the current authenticator code after sign-in.
+
+Submit /account/forgot-password and open the latest matching link in the ignored docs/auth-outbox.local.md. Save a new password, then sign in with it. The local outbox replaces inbox delivery during development. See [Auth setup](auth-setup.md) for optional SMTP settings and confirmation mode. Actual SMTP delivery is deferred and untested.
+
+## Changes and observed checks
+
+- Auth.js v5 Credentials (next-auth 5.0.0-beta.32) replaces the Supabase SDK. Prisma stores bcrypt credentials, database-revocable sessions, hashed single-use email tokens and encrypted TOTP secrets. Supabase remains the PostgreSQL host. No Auth.js adapter is needed for Credentials with JWT sessions.
+- The migration passed a rolled-back rehearsal, then deployed successfully. Existing account UUIDs, emails, bcrypt hashes and protected roles were preserved. The retained development administrator's known authenticator key was encrypted into the new store and verified in Chrome. Previous provider sessions require a new sign-in; previous provider email links are retired.
+- Replaced provider-dependent RLS helpers and the audit actor lookup with application-owned session identity. Backend-only auth tables deny authenticated-user access. Administrator checks require both the MFA claim and a matching database session with completed MFA. The public catalogue and publishing conventions remain intact.
+- The ignored .env has a generated AUTH_SECRET, canonical AUTH_URL, immediate local sign-in, local email preview and SMTP placeholders. Removed unused Supabase public auth keys. Updated .env.example, setup instructions and the ignored development account review notes.
+- Added auth:flows. It passed local registration, role allowlisting, wrong-password rejection, optional confirmation, token hashing, one-use confirmation/recovery, expired recovery denial, password replacement, session revocation, tamper-resistant MFA encryption and bcrypt byte limits. Fixtures and their local email previews were removed.
+- auth:verify, publishing:verify and db:verify passed. Included private auth-table denial and rejection of an MFA claim without a verified database session. Transaction fixtures rolled back.
+- Chrome passed tourist and manager registration/sign-in, manager return paths, tourist/manager admin denial, tourist manager-workspace denial, sign-out and old-cookie replay denial, recovery, changed-password sign-in and consumed-link rejection. The migrated manager password and administrator password/MFA/publishing workspace passed. An idle operator connection reset during browser fixture cleanup; a fresh connection checked cleanup and confirmed no matching test accounts remained.
+- A focused Chrome run passed fresh MFA enrollment, current-session MFA, TOTP replay rejection, confirmation callback/replay denial and 360px registration validation with account-type/return-path preservation. The focused fixture was removed.
+- Final production build and standalone TypeScript checks passed. The initial build hit a generated-cache Windows lock; clearing the verified .next cache and restarting compilation resolved it. Lint passed. The patched mail dependency is pinned through an override; npm audit reports no high/critical advisories and eight moderate advisories remain in the dependency tree.
+
+---
+
 # Module 05 · Administrator publishing
 
 **Completed on 9 November 2026.** Next module: 06, hotel manager workspace. The user authorized continuing local development while SMTP remains deferred.

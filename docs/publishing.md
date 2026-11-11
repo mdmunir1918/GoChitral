@@ -1,6 +1,6 @@
 # Module 05 · Administrator publishing
 
-Open the Administrator section of the ignored `docs/development-credentials.local.md`. Add its setup key to a TOTP authenticator app, sign in and open [the publishing workspace](http://127.0.0.1:3000/admin). Enter the current authenticator code when prompted. Return to the administrator workspace from Account after verification.
+Open the Administrator section of the ignored `docs/development-credentials.local.md`. For local testing, sign in with its email and password and open [the publishing workspace](http://127.0.0.1:3000/admin). Authenticator codes are temporarily disabled locally by AUTH_REQUIRE_ADMIN_MFA=false. Set it to true and restart to enable them again.
 
 ## Review a listing
 
@@ -16,7 +16,7 @@ Suspend a published listing and verify that its detail URL returns 404 and Explo
 
 ## Database and authorization
 
-Listing writes and revision reads require an active administrator session with MFA. A database trigger records each moderation change inside the same transaction. Audit rows are append-only for application users. Public readers cannot retrieve draft revisions, audit history or guide evidence.
+Listing writes and revision reads require an active administrator session with MFA when enabled. A database trigger records each moderation change inside the same transaction. Audit rows are append-only for application users. Public readers cannot retrieve draft revisions, audit history or guide evidence.
 
 Version-conditional updates reject concurrent edits. A failed operation rolls back the listing, draft and audit changes together. Trips arrive in Module 08, so this module records zero dependent trips on suspension.
 

@@ -1,25 +1,9 @@
-import { createServerClient } from "@supabase/ssr";
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function proxy(request: NextRequest) {
-  let response = NextResponse.next({ request });
+// Pages and actions validate sessions themselves. Avoid another database trip here.
+export function proxy() {
+  const response = NextResponse.next();
   response.headers.set("Cache-Control", "private, no-store");
-  if (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) return response;
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-    { cookies: {
-      getAll: () => request.cookies.getAll(),
-      setAll: (values) => {
-        values.forEach(({ name, value }) => request.cookies.set(name, value));
-        response = NextResponse.next({ request });
-        values.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
-        response.headers.set("Cache-Control", "private, no-store");
-      },
-    } },
-  );
-  await supabase.auth.getUser();
   return response;
 }
-
-export const config = { matcher: ["/account/:path*", "/auth/:path*", "/manager/:path*", "/admin/:path*"] };
+export const config = { matcher: ["/account/:path*", "/auth/:path*", "/manager/:path*", "/admin/:path*", "/my-trips/:path*", "/api/trips/:path*", "/api/guides/:path*"] };

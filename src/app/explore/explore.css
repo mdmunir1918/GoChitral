@@ -15,9 +15,9 @@
 .filter-fields label { min-width: 0; margin: 0; }
 .filter-fields select {
   display: block; width: 100%; min-height: 46px; margin-top: .45rem; padding-inline: .5rem;
-  border: 1px solid #9b919f; border-radius: .35rem; background: white; font-size: 1rem; font-weight: 400;
+  border: 1px solid var(--rule); border-radius: .35rem; background: var(--surface); font-size: 1rem; font-weight: 400;
 }
-.catalogue-controls button { min-height: 46px; padding-inline: 1.1rem; border-radius: .35rem; color: var(--pearl); background: var(--aubergine); cursor: pointer; }
+.catalogue-controls button { min-height: 46px; padding-inline: 1.1rem; border-radius: .35rem; color: var(--pearl); background: var(--terracotta); cursor: pointer; }
 .results-heading, .page-nav { display: flex; flex-wrap: wrap; align-items: baseline; gap: 1rem; }
 .results-heading { justify-content: space-between; margin: 2rem 0 1rem; overflow-wrap: anywhere; }
 .results-heading h2 { font: 1.65rem/1.2 var(--serif); }
@@ -25,7 +25,8 @@
 .listing-card img { width: 100%; aspect-ratio: 1.65; object-fit: cover; border-radius: .25rem; }
 .listing-card .listing-location { margin-top: 1rem; }
 .listing-card h3 { margin: .4rem 0; font: 1.7rem/1.18 var(--serif); }
-.listing-card p:last-child { color: var(--muted); line-height: 1.5; }
+.listing-card > p:not(.listing-location) { color: var(--muted); line-height: 1.5; }
+.listing-card > .text-link { display: inline-flex; align-items: center; min-height: 44px; margin-top: .25rem; }
 .page-nav { justify-content: center; border-top: 1px solid var(--rule); margin-top: 2rem; padding-top: 1.5rem; }
 @media (max-width: 64rem) {
   .explore-page .place-search { display: block; }

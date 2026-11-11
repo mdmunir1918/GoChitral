@@ -1,5 +1,5 @@
 import type { Prisma } from "@/generated/prisma/client";
-import { contentSchema, listingFields } from "./validation";
+import { contentSchema, guideProfileFields, listingFields } from "./validation";
 
 export class PublishingConflict extends Error {}
 
@@ -26,7 +26,11 @@ export async function savePublication(tx: Prisma.TransactionClient, input: Publi
   } else {
     const content = contentSchema.parse(input.content);
     if (current && (current.category !== content.category || current.slug !== content.slug)) throw new Error("An existing listing keeps its category and URL slug.");
-    if (!await tx.media.findUnique({ where: { id: content.photoId } })) throw new Error("Choose an approved photograph.");
+    const photo = await tx.media.findUnique({ where: { id: content.photoId } });
+    if (!photo) throw new Error("Choose an approved photograph.");
+    if (photo.license === "owner" && (content.category !== "hotels" || !await tx.hotelPhoto.findFirst({
+      where: { hotelId: input.listingId, approved: true, id: content.photoId.replace(/^hotel-photo-/, "") },
+    }))) throw new Error("Choose a currently approved photo for this hotel.");
     const publish = input.intent === "publish" || input.intent === "reactivate";
     if (publish && (!content.sourceTitle || !content.sourceUrl)) throw new Error("Add the information source title and HTTPS URL before publishing.");
     if (content.category !== "destinations") {
@@ -55,9 +59,14 @@ export async function savePublication(tx: Prisma.TransactionClient, input: Publi
         create: { guideId: input.listingId, evidence: input.evidence },
         update: { evidence: input.evidence },
       });
+      if (publish) await tx.guideProfile.upsert({
+        where: { guideId: input.listingId },
+        create: { guideId: input.listingId, ...guideProfileFields(content) },
+        update: guideProfileFields(content),
+      });
     }
     if (publish) url = `/${content.category}/${content.slug}`;
   }
-  // A database trigger appends the audit in the same transaction, deriving its actor from auth.uid().
+  // A database trigger appends the audit in the same transaction using the verified session identity.
   return { version, url };
 }

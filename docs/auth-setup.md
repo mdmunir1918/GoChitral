@@ -1,61 +1,45 @@
-# Module 04 · Accounts
+# Accounts with Auth.js
 
-The app uses Supabase Auth for identities and Prisma for protected account roles and owned records. The database URLs continue to serve Prisma. The Supabase project URL and publishable key serve the Auth client.
+Auth.js Credentials handles email/password sign-in. Prisma stores accounts, bcrypt password hashes, revocable sessions, hashed single-use email tokens and encrypted authenticator secrets. Supabase hosts PostgreSQL. Its Auth service and public API keys are no longer used by the application.
 
-## Environment
+## Local review
 
-The ignored `.env` contains the existing database URLs, the project URL derived from the database connection, the publishable key and `APP_ORIGIN=http://127.0.0.1:3000`. `.env.example` lists the same variable names with safe values.
+The ignored .env already contains the database connections, generated AUTH_SECRET, APP_ORIGIN and AUTH_URL. Keep AUTH_SECRET stable so existing sessions and encrypted authenticator secrets continue to work. .env.example lists the placeholders without credentials.
 
-The project URL identifies your Supabase project. Find the publishable key in the project's Connect dialog or Settings → API Keys. It starts with `sb_publishable_` and is designed for client use. [Supabase key instructions](https://supabase.com/docs/guides/getting-started/api-keys)
+AUTH_REQUIRE_EMAIL_VERIFICATION=false lets new local tourist and manager accounts sign in immediately. Registration returns to the sign-in form. Existing account emails, passwords and roles were migrated. Existing provider sessions require a fresh sign-in. The retained administrator keeps the authenticator setup key in the ignored docs/development-credentials.local.md.
 
-## Email configuration and review
+Open /account/register, create an account using a password of at least 8 characters, including a letter and a number, then sign in. Managers can open /manager. Public registration cannot assign the administrator role.
 
-In Supabase Authentication → URL Configuration, set Site URL to `http://127.0.0.1:3000` and allow `http://127.0.0.1:3000/auth/confirm` as a redirect URL.
+With AUTH_EMAIL_MODE=local, recovery links appear in the ignored docs/auth-outbox.local.md. Submit /account/forgot-password, open the latest link for that address, and choose a new password. Local email preview requires a loopback APP_ORIGIN. No inbox delivery is attempted. Links expire after one hour and can be consumed once. Password changes revoke all sessions. Old links from Supabase Auth no longer apply.
 
-For email links that work across browsers, set the Confirm signup email link to:
+## SMTP later
 
-```html
-<a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email">Confirm your email</a>
-```
+Set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD and SMTP_FROM using your mail provider's SMTP settings. Set AUTH_EMAIL_MODE=smtp and restart the app. Port 465 uses TLS immediately; other ports use STARTTLS. These settings belong in the application's ignored .env. Supabase Authentication email settings are no longer involved.
 
-Set the Reset password email link to:
-
-```html
-<a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery">Reset your password</a>
-```
-
-Use a development inbox permitted by your SMTP provider. Register at `/account/register`, select Tourist or Hotel manager, confirm the email and sign in. Managers can open `/manager`. Use `/account/forgot-password` to request recovery and follow the email to choose a password of at least 12 characters. An invalid or expired link offers a new recovery request.
-
-Supabase's built-in email service limits both recipients and sending volume. A registration response of `over_email_send_rate_limit` means the email sending quota is exhausted. Wait for that quota to recover or configure a custom SMTP service in Supabase Auth email settings. Configure the SMTP credentials in Supabase. [Supabase SMTP setup and current limits](https://supabase.com/docs/guides/auth/auth-smtp)
+Set AUTH_REQUIRE_EMAIL_VERIFICATION=true to require confirmation before sign-in. Configure mail first and test delivery with your own address. Registering an existing unconfirmed address sends a fresh confirmation link. Use matching deployed HTTPS addresses for APP_ORIGIN and AUTH_URL.
 
 ## Administrator provisioning
 
-Create and confirm your own account, then open `/account/mfa`. Enter the displayed setup key in an authenticator app and verify its six-digit code.
-
-A trusted database operator copies that user's UUID from Supabase Authentication → Users and runs:
+For local testing, AUTH_REQUIRE_ADMIN_MFA=false lets administrators sign in with email and password. The app accepts this setting only with a loopback APP_ORIGIN. Set it to true and restart to require authenticator codes again. Existing authenticator setup keys remain available. With MFA enabled, sign in, open /account/mfa and verify a code before provisioning. A trusted operator finds the account UUID in Prisma Studio or the public Account table, then runs:
 
 ```powershell
 npm.cmd run auth:admin -- YOUR_USER_UUID
 ```
 
-This command promotes a confirmed account only after an authenticator is verified. Administrator pages require a current second-factor verification. No public registration choice can create an administrator.
+The command requires a verified authenticator when MFA is enabled and a confirmed email when email confirmation is enabled. Administrator pages and database policies use the same MFA setting. Non-local deployments always require MFA.
 
-## Verification and access model
+## Checks and access
 
 ```powershell
 npm.cmd run auth:verify
+npm.cmd run auth:flows
+npm.cmd run publishing:verify
 npm.cmd run db:verify
 npm.cmd run lint
 npm.cmd run build
 npm.cmd run typecheck
 ```
 
-`auth:verify` creates two tourists and two managers in a transaction, checks isolation, draft ownership, role escalation denial, session revocation, return paths and shared rate limits, then rolls back.
+Auth.js uses a signed/encrypted JWT cookie backed by a revocable database session. Every private operation checks the current database session. Normal account and content requests use the authenticated PostgreSQL role with RLS. Credentials, tokens and session storage are accessible only through the server's gochitral_auth role. The public catalogue keeps its published-only role. A restricted runtime login needs membership in gochitral_public, authenticated and gochitral_auth; keep the operator connection separate.
 
-The server verifies the Supabase user before passing identity claims to a Prisma transaction using the authenticated database role. RLS checks both user identity and the active Supabase session. Private responses bypass shared caching. The public catalogue retains its published-only role.
-
-If you replace the development operator connection with a restricted application login, grant that login membership in both `gochitral_public` and `authenticated`. Keep its table privileges restricted and the operator connection separate.
-
-Sign-out revokes Supabase sessions. Replaying an old session cannot open protected app pages. Password recovery uses a short-lived cookie issued only after the recovery link is verified. Account operations require the configured origin. Authentication attempts use a shared PostgreSQL limit of eight attempts per identity per 15-minute window.
-
-Callback query strings are excluded from Next.js development request logs. Configure hosting and reverse-proxy logs to redact callback tokens at deployment.
+Account mutations check APP_ORIGIN, and separate PostgreSQL rate limits bound sign-in, registration, recovery and MFA attempts. Successful sign-ins clear their failed-attempt count. Sign-out revokes sessions, including old-cookie replay. Administrator MFA is checked in both the server and database policies. Callback query strings are excluded from development request logs; deployment logs should redact them too.

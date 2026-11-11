@@ -16,6 +16,9 @@ export function SiteNavigation() {
   const links = [
     { href: "/", label: "Home" },
     { href: "/explore", label: "Explore" },
+    { href: "/guides", label: "Find a guide" },
+    { href: "/plan", label: "Plan a trip" },
+    { href: "/my-trips", label: "My trips" },
     { href: "/account", label: "Account" },
   ].map(({ href, label }) => (
     <Link key={href} href={href} aria-current={pathname === href ? "page" : undefined} onClick={closeMenu}>

@@ -15,7 +15,15 @@ export type Photo = {
   caption: string;
   author: string;
   original: string;
-  license: "3.0" | "4.0";
+  license: "3.0" | "4.0" | "owner";
+};
+
+export type PublicGuideProfile = {
+  languages: string[];
+  expertise: string[];
+  areasServed: string[];
+  credentialSummary: string;
+  pricingUnit: "per_group_day";
 };
 
 type ListingFields = {
@@ -33,11 +41,16 @@ type ListingFields = {
   contactUrl?: string;
   latitude?: number;
   longitude?: number;
+  roomCount?: number;
+  fromNightlyMinor?: number;
+  servicePriceMinor?: number | null;
+  guideProfile?: PublicGuideProfile;
 };
 
 export type Listing = ListingFields & (
   | { category: "destinations"; destinationId?: never }
-  | { category: Exclude<Category, "destinations">; destinationId: string }
+  | { category: "activities" | "hotels"; destinationId: string }
+  | { category: "guides"; destinationId: string }
 );
 
 export function listingUrl(listing: Listing) {

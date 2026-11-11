@@ -15,6 +15,7 @@ export default async function Manager({ searchParams }: PageProps<"/manager">) {
   }));
   return <section className="frame account-page">
     <h1>Your hotel workspace</h1>
+    <p><Link className="text-link" href="/manager/hotels">Manage hotels, rooms and photos →</Link></p>
     {listings.length ? <ul>{listings.map(({ hotel }) => <li key={hotel.id}>{hotel.title} · {hotel.status}</li>)}</ul> : <p>No hotel listings to show.</p>}
     <Link className="text-link" href="/account">Your account</Link>
   </section>;
