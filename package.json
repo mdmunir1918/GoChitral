@@ -29,6 +29,7 @@
     "admin:verify": "node --conditions=react-server --import tsx prisma/verify-admin-dashboard.ts",
     "maps:verify": "node --import tsx src/features/maps/verify-route.ts",
     "recommendations:verify": "node --import tsx src/features/recommendations/verify.ts",
+    "assistant:verify": "node --import tsx src/features/assistant/verify-conversation.ts",
     "db:seed-guide": "node --conditions=react-server --import tsx prisma/seed-demo-guide.ts",
     "db:seed-guides": "node --conditions=react-server --import tsx prisma/seed-demo-guide.ts",
     "media:cleanup": "node --conditions=react-server --import tsx prisma/cleanup-hotel-photos.ts"

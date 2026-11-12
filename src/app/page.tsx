@@ -10,6 +10,8 @@ export default function Home() {
         <h1 id="home-title">Discover <em>Chitral.</em></h1>
         <p className="intro">A local travel guide to the valleys and mountain landscapes of Chitral.</p>
         <PlaceSearch />
+        <Link className="browse-link" href="/assistant">Ask the GoChitral assistant <span aria-hidden="true">→</span></Link>
+        <Link className="text-link" href="/plan">Or plan the trip yourself</Link>
         <Link className="browse-link" href="/explore">Explore the guide <span aria-hidden="true">→</span></Link>
       </section>
       <figure className="landscape">

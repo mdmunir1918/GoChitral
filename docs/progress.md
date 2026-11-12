@@ -1,6 +1,6 @@
-# Module 11 · Recommendations and trip planning assistant
+# Module 11 · Recommendations and travel assistant
 
-**Module 11 is complete and ready for review.** The recommendations page remains available. The old question-and-answer assistant has been removed from listing pages, the planner, the admin menu and its API. The new trip planning assistant is on `/plan` and makes an itinerary draft from the trip details already entered there.
+**Module 11 is ready for review.** The recommendations page remains available. The user-facing assistant is a separate chat at `/assistant`; `/plan` remains a manual itinerary builder.
 
 ## Recommendations
 
@@ -8,14 +8,14 @@
 - `recommendations:verify` passed its deterministic examples and checks for stable ties, destination filtering, reasons, no eligible listings and missing prices. It writes no database rows.
 - The connected catalogue previously showed 2 destinations, 2 activities, 11 hotels and 10 guides. Many entries are clearly marked demo listings.
 
-## Trip planning assistant follow-up
+## Conversational assistant follow-up
 
-- The planner uses the entered dates, group size, budget and selected destinations, plus optional interests. It reads published catalogue and room data through the existing Prisma/Supabase readers, uses `rankListings()` to choose activities, and uses the existing `quotePlan()` for its known-cost estimate. The user can apply the result to the current itinerary, edit it and review its budget. It does not save or book automatically.
-- This is a deterministic demo planner, not a trained language model. No model provider or model key is required. It uses current published GoChitral records, including demo records already in the development catalogue. Price and entry-fee gaps are shown as unknown costs.
-- Browser check on `/plan`: for 2–4 December 2026, 5 people, PKR 50,000, Bumburet Valley and Chitral Town, it generated three days, applied them to the planner, and loaded the budget review. The known estimate was PKR 21,600; six activity/entry-fee costs were unknown and not counted as free. The rooms and quantities matched the group size.
-- Repeatable offline check: `node --import tsx src/features/planner/verify-assistant.ts` passed a separate three-day, two-destination plan, repeat-input stability, room capacity, unknown prices and unavailable destinations. It wrote no database rows. TypeScript (`tsc --noEmit`) and targeted ESLint passed. `recommendations:verify` also passed after removal of the old Q&A feature.
-- The production build could not run while the dev server was using `.next`; Next.js returned Windows `EPERM` while trying to remove `.next/build/chunks`. I left the running app and build output untouched. Retry `npm run build` after stopping `npm run dev` in the VS Code terminal.
-- The old knowledge database models, tables and migrations are retained but no longer have a user-facing page, endpoint or runtime reader. They are left in place to avoid dropping database data or disrupting migration history. No Module 12 work has started.
+- Added a dedicated `/assistant` page with suggested questions, a free-text chat box, trip dates and traveler controls, follow-up questions, hotel/activity/guide cards and day-by-day itinerary replies. Added “AI Assistant” navigation and separate links from the home page for asking the assistant and planning manually. The manual `/plan` page no longer contains the automatic plan generator.
+- The user chose to keep this as a local demo until selecting an AI provider. It makes no external model calls. It matches supported requests against published GoChitral listings with the existing ranking and planning functions; unsupported questions receive a clear limitation message. This gives the conversation shape and catalogue flow, but it is not yet Tripadvisor-level open-ended AI. No model key or data is transmitted externally.
+- `POST /api/assistant/chat` validates same-origin JSON, limits messages to 500 characters and request bodies to 4 KiB, rate-limits requests, and reads only published records. Chats stay in page memory and are not written to the database. Prices or availability without current catalogue values are shown as unknown; the assistant does not book or save a trip.
+- Browser check on `/assistant`: “Show me family hotels in Bumburet” returned three published hotel cards with prices and match explanations. A request for a 3-day trip with PKR 50,000, four people, Bumburet Valley and nature/culture returned a day-by-day plan from 1–3 December 2026. A separate browser check confirmed `/plan` contains the manual trip controls and no assistant panel.
+- `assistant:verify` passed follow-up prompts, extracting multi-turn details, a repeatable three-day plan, hotel suggestions and unsupported-question fallback. `planner:assistant:verify`, TypeScript and targeted ESLint passed. Tests wrote no database rows.
+- A production build was not run because the development server owns `.next`; its previous build attempt failed on a Windows file lock. Retry after stopping the development server in the VS Code terminal. The knowledge database models, tables and migrations are retained without a user-facing page or runtime reader to avoid dropping data or disturbing migration history. No Module 12 work has started.
 
 ---
 

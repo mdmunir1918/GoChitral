@@ -17,6 +17,7 @@ export function SiteNavigation() {
     { href: "/", label: "Home" },
     { href: "/explore", label: "Explore" },
     { href: "/guides", label: "Find a guide" },
+    { href: "/assistant", label: "AI Assistant" },
     { href: "/plan", label: "Plan a trip" },
     { href: "/my-trips", label: "My trips" },
     { href: "/account", label: "Account" },

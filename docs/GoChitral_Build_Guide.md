@@ -62,7 +62,7 @@ If PowerShell blocks npm.ps1, use `npm.cmd` and `npx.cmd` for the same commands.
 | 03–04 | Supabase development project, PostgreSQL, Auth, Storage, SQL migrations and Zod | Persist published content, validate writes and enforce row access. A hosted development project keeps Docker optional on Windows. |
 | 04–09 | Vitest for calculations and transitions, Playwright with Chromium for real user flows | Introduce the tools with the first relevant test. Use an isolated test database for permission and concurrency tests. |
 | 10 | Leaflet, a permitted tile service and a routing API; PostGIS when spatial queries are needed | Leaflet displays a map. A routing service supplies route estimates. PostGIS supports geographic queries in PostgreSQL. |
-| 11–13 | Reviewed knowledge rules, HTTPS hosting, domain, Search Console | A hosted language model is an optional extension. Core trip planning and advice work without a model key. |
+| 11–13 | Curated catalogue data, optional AI provider, HTTPS hosting, domain, Search Console | The local travel assistant can use published catalogue data without an AI provider key. |
 
 At the first automated test, run `npm install -D vitest @playwright/test` and `npx playwright install chromium`. Configure Playwright to start the app against test data. Use a separate data set per parallel worker or run database-changing tests serially.
 
@@ -102,7 +102,7 @@ The final conceptual presentation supplies the roles and flows. The order below 
 | Guest | Published places, activities, hotels and guides | Creates a temporary trip draft and asks supported questions. |
 | Tourist | Public content, own trips and own guide requests | Saves or edits own trips, exports a summary and submits a guide request. |
 | Hotel manager | Public content and own listings, rooms and submissions | Creates a hotel, edits own details, prices, amenities and photos, submits for publication. |
-| Administrator | Moderation queue, guide requests, knowledge and aggregate reports | Publishes or suspends listings, maintains destinations, activities, guides and rules, decides requests. |
+| Administrator | Moderation queue, guide requests and aggregate reports | Publishes or suspends listings, maintains destinations, activities and guides, and decides requests. |
 
 Assign a manager account through the manager registration flow. Restrict it to its own records. Provision administrators through a trusted operator action. Guide profiles are managed by administrators in this design. A guide request becomes a booking only after confirmation. Hotels are catalogue listings with room estimates and contact actions.
 
@@ -285,18 +285,18 @@ npm install -D @types/leaflet
 
 ---
 
-# 11  Rank options and answer local questions
-**Depends on 10. Result** — A traveller understands why an option appears and gets a sourced answer or a useful fallback.
+# 11  Rank options and build the travel assistant
+**Depends on 10. Result** — A traveller understands why an option appears, can ask for published Chitral suggestions in a separate assistant chat, or make an itinerary by hand.
 
 1. Filter candidates by publication, destination and hard constraints such as capacity, dates with known restrictions and accessibility needs. Then score eligible options using pure TypeScript. Return IDs, reason labels and a stable tie-breaker. The traveller decides which suggestions enter the plan.
 2. Use a transparent starter score. Give interest match 50%, budget fit 30% and destination proximity 20%, each scaled to 0–1. For missing optional signals, renormalise the available weights and disclose missing price or distance. If all signals are missing, use a stable catalogue order. Example: 1.0, 0.5 and 1.0 gives 0.85.
 3. Keep the design’s historical travel cases and popularity as bounded signals. At cold start use reviewed sample cases or omit the case signal. Once Module 12 produces sufficient aggregates, compare coarse trip duration, party band and interests against anonymised cases; use case similarity followed by popularity only as tie-breakers in V1. Never expose another tourist’s itinerary.
-4. Add a knowledge editor for administrators and an assistant drawer on details and planner days. Store topic, approved answer, matching terms, source, reviewed date, expiry and related published listing IDs. Match supported questions against maintained rules. Offer related questions when no rule matches.
-5. For changing road or access conditions, return the verification date and an appropriate official source. Expired facts trigger an “unable to verify” response. An optional hosted model may later rephrase approved facts behind a feature flag with limits and deterministic fallback.
+4. Keep two separate journeys: `/assistant` is a chat with suggested questions, trip dates and traveler count, follow-up questions, published listing suggestions and day-by-day draft replies. `/plan` stays a manual trip builder. Do not put an automatic plan generator inside the manual planner.
+5. Start with a local demo that uses published GoChitral listings and the existing ranking, capacity and budget functions. Clearly disclose missing prices, no live availability and unsupported requests. The user may choose an external AI provider later; do not send chat messages to a provider before it is configured.
 
 **Security** — Treat questions, context and any model output as untrusted text. Constrain length, frequency and costs. The assistant may suggest published IDs. Saving a trip or booking requires a separate authorised user action. Keep raw questions and personal trip data out of analytics.
 
-**Acceptance** — A small labelled fixture set covers an exact match, tie, missing price, no eligible result, expired advice and an instruction to expose another user’s trip. Check the order, stated reasons and fallback. Run the same inputs twice and obtain the same ranking. Disable any model key and repeat the core demo.
+**Acceptance** — Test a hotel suggestion, a trip request with missing details and its follow-up, a complete multi-day draft, an unsupported question and repeatable output. Confirm the assistant and manual planner are separate routes. No database writes or external model calls are needed for the local demo.
 
 ---
 
