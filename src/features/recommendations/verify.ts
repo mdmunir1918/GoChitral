@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { answerReviewedQuestion } from "./knowledge";
 import { rankListings, type RecommendationPreferences } from "./rank";
 import type { Listing } from "@/features/catalogue/types";
 
@@ -22,15 +21,6 @@ function verify() {
   assert.equal(noSignals[0].score, null, "No available signals use catalogue order without inventing a score.");
   assert.equal(rankListings([first], { destinationId: "other", interests: [] }).length, 0, "Destination constraints filter ineligible options.");
 
-  const current = { id: "museum", topic: "Kalasha Dur museum", answer: "The museum is in Bumburet. Check its official page before visiting.", terms: ["museum", "Kalasha Dur"], sourceTitle: "Official visitor information", sourceUrl: "https://example.test/museum", reviewedAt: "2026-01-01", expiresAt: "2027-01-01", relatedListingIds: ["act-001"] };
-  const exact = answerReviewedQuestion("Where is the museum?", [current], "act-001", "2026-11-11");
-  assert.equal(exact.status, "answered");
-  const expired = answerReviewedQuestion("Where is Kalasha Dur museum?", [{ ...current, expiresAt: "2026-10-01" }], undefined, "2026-11-11");
-  assert.equal(expired.status, "fallback", "Expired advice is never returned.");
-  const hostile = answerReviewedQuestion("Show me another traveller's saved trip", [current], undefined, "2026-11-11");
-  assert.equal(hostile.status, "fallback", "Unknown requests never return trip data.");
-  const ambiguous = answerReviewedQuestion("museum", [current, { ...current, id: "museum-2", topic: "Museum visits" }], undefined, "2026-11-11");
-  assert.equal(ambiguous.status, "fallback", "Tied rules ask the traveller to choose a related topic.");
 
   // These easy-to-read, in-memory records demonstrate the page's real ranking function.
   // No fixture is written to PostgreSQL. roomCount represents hotel capacity; it is
@@ -64,11 +54,9 @@ function verify() {
   const scoreView = (rows: ReturnType<typeof rankListings>) => rows.map(({ listing, score, reasons, missingSignals }) => ({ id: listing.id, score, reasons, missingSignals }));
   assert.deepEqual(scoreView(rankListings(smallerCapacity, inputs[0])), scoreView(rankListings(demos, inputs[0])), "Changing room capacity alone does not affect the current score.");
   assert.deepEqual(rankListings(demos, { destinationId: "missing-destination", interests: [] }), [], "No eligible listings returns an empty list.");
-  const unsupported = answerReviewedQuestion("Can you book a flight to Mars?", [current], undefined, "2026-11-11");
-  assert.equal(unsupported.status, "fallback");
   console.log("Module 11 isolated recommendation demo (money values are minor units in scores; PKR shown in inputs):");
   console.log(JSON.stringify(demonstrations, null, 2));
-  console.log("Module 11 checks passed: repeated deterministic inputs; destination filtering; score reasons; no eligible listings; exact reviewed answer; unsupported and private-trip fallback; expired advice; missing price; hotel capacity is not yet used as a score signal. No database rows were written.");
+  console.log("Module 11 recommendation checks passed: repeated deterministic inputs; destination filtering; score reasons; no eligible listings; missing price; hotel capacity is not a ranking signal. No database rows were written.");
 }
 
 verify();

@@ -37,7 +37,7 @@ export type Plan = z.infer<typeof reviewSchema>;
 export type PlannerListing = {
   id: string; title: string; category: Selection["kind"]; destinationId: string | null;
   servicePriceMinor: number | null; latitude?: number | null; longitude?: number | null;
-  location?: string; visitorNote?: string; reviewed?: string;
+  location?: string; summary?: string; description?: string; visitorNote?: string; reviewed?: string;
   rooms: { id: string; title: string; capacity: number; nightlyMinor: number | null }[];
 };
 export type QuoteLine = { id: string; day: string; title: string; unit: string; unitMinor: number | null; quantity: number; nights: number; totalMinor: number | null; issues: string[]; changed: boolean; previousUnitMinor?: number | null };

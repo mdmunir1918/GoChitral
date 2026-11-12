@@ -7,7 +7,7 @@ export async function readPlannerCatalogue(transaction?: Prisma.TransactionClien
   const read = async (tx: Prisma.TransactionClient) => {
     await tx.$executeRaw`SET LOCAL ROLE gochitral_public`;
     const rows = await tx.$queryRaw<(Omit<PlannerListing, "reviewed"> & { reviewed: Date })[]>`
-      SELECT l.id, l.title, l.category, l."destinationId", l."servicePriceMinor",
+      SELECT l.id, l.title, l.category, l."destinationId", l."servicePriceMinor", l.summary, l.description,
         l.latitude, l.longitude, l.location, l."visitorNote", l.reviewed,
         COALESCE((SELECT json_agg(json_build_object('id', r.id, 'title', r.title,
           'capacity', r.capacity, 'nightlyMinor', r."nightlyMinor") ORDER BY r."nightlyMinor", r.id)

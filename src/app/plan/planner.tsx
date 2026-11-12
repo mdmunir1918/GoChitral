@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { calendarDays, dateImpact, dateLabel, deviceDraftSchema, draftKey, limits, money, newDraft, restoreDraft, tripSchema, type DeviceDraft, type PlannerListing, type Quote, type Selection, type Settings } from "@/features/planner/model";
+import { calendarDays, dateImpact, dateLabel, deviceDraftSchema, draftKey, draftLifetime, limits, money, newDraft, restoreDraft, tripSchema, type DeviceDraft, type PlannerListing, type Quote, type Selection, type Settings } from "@/features/planner/model";
 import { categoryLabels } from "@/features/catalogue/types";
 import { MapDrawer, type MapStop } from "@/features/maps/map-drawer";
-import { AssistantDrawer } from "@/features/recommendations/assistant-drawer";
+import { TripAssistant } from "@/features/planner/trip-assistant";
+import type { AssistantPlan } from "@/features/planner/assistant";
 
 type Props = { initial: DeviceDraft; catalogue: PlannerListing[]; addId: string; storageKey?: string };
 export function Planner({ initial, catalogue, addId, storageKey = draftKey }: Props) {
@@ -94,6 +95,16 @@ export function Planner({ initial, catalogue, addId, storageKey = draftKey }: Pr
     const changed = draft.trip.start !== valid.data.start || draft.trip.end !== valid.data.end;
     if (changed && (impact.removed.length || impact.checkout.length)) { setPendingDates(valid.data); return; }
     applySettings(valid.data);
+  }
+  function applyGeneratedPlan(plan: AssistantPlan) {
+    const trip: Settings = plan.trip;
+    const items: Selection[] = plan.days.flatMap((planDay) => planDay.items.map(({ day: itemDay, kind: itemKind, listingId: itemListingId, roomId: itemRoomId, quantity: itemQuantity }) => ({
+      id: crypto.randomUUID(), day: itemDay, kind: itemKind, listingId: itemListingId,
+      ...(itemRoomId ? { roomId: itemRoomId } : {}), quantity: itemQuantity,
+    })));
+    edit({ ...draft, title: draft.title?.trim() || `${plan.days.length}-day Chitral trip`, expiresAt: Date.now() + draftLifetime, trip, items });
+    setSettings(trip); setActiveDay(trip.start); setPendingDates(null); setStep(2);
+    setMessage("Plan added. Review each day and check the budget before saving.");
   }
   function addSelection() {
     if (!listing || !choices.some(l => l.id === listing.id)) { setMessage("Choose an item in one of your trip destinations."); return; }
@@ -194,11 +205,11 @@ export function Planner({ initial, catalogue, addId, storageKey = draftKey }: Pr
         {!!impact.checkout.length && <><p>These hotel choices become checkout-day choices and will charge zero nights:</p><ul>{impact.checkout.map(i => <li key={i.id}>{dateLabel(i.day)} · {title(i)}</li>)}</ul></>}
         <div className="plan-actions"><button type="button" onClick={() => applySettings(pendingDates)}>Apply date changes</button><button className="secondary" type="button" onClick={() => { setPendingDates(null); setSettings(draft.trip); }}>Keep current dates</button></div>
       </div>}
+      <TripAssistant trip={settings} destinations={destinations} onApply={applyGeneratedPlan} />
     </section>}
     {step === 2 && <section aria-labelledby="day-plan-title"><h2 id="day-plan-title">Plan your days</h2><p>{days.length} calendar days · {Math.max(0, days.length - 1)} hotel {days.length === 2 ? "night" : "nights"} · {draft.trip.people} people</p>
       <p>Add a hotel to each overnight day you want to include. Unselected hotel nights are not included in the estimate.</p>
       <div className="plan-day-picker"><label>Choose a day<select value={day} onChange={e => setActiveDay(e.target.value)}>{days.map((d, index) => <option key={d} value={d}>Day {index + 1} · {dateLabel(d)}</option>)}</select></label></div>
-      <AssistantDrawer contextListingId={mapStopsForDay(day)[0]?.id ?? draft.trip.destinationIds[0]} />
       <form className="plan-add" onSubmit={e => { e.preventDefault(); addSelection(); }}>
         <h3>Add or replace an item</h3>
         <label>Item type<select value={kind} onChange={e => { const next = e.target.value as Selection["kind"]; setKind(next); setListingId(""); setRoomId(""); setQuantity(next === "activities" ? draft.trip.people : 1); }}>{Object.entries(categoryLabels).map(([key, name]) => <option value={key} key={key}>{name}</option>)}</select></label>

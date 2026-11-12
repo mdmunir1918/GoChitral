@@ -51,7 +51,6 @@ export default async function Admin({ searchParams }: PageProps<"/admin">) {
       <Link href="#listings">Review listings <span>{metrics.listings.byStatus.draft ?? 0} drafts</span></Link>
       <Link href="/admin/hotels">Review hotel submissions <span>{metrics.hotelSubmissions.pending ?? 0} waiting</span></Link>
       <Link href="/admin/guide-requests">Review guide requests <span>{metrics.guideRequests.pending ?? 0} pending</span></Link>
-      <Link href="/admin/knowledge">Manage reviewed answers <span>Sources, review dates and expiry</span></Link>
     </nav>
 
     <section className="admin-analytics-grid" aria-label="Platform analytics">
@@ -70,7 +69,7 @@ export default async function Admin({ searchParams }: PageProps<"/admin">) {
         <tr><th scope="row">Guest</th><td>Browse published places, stays, activities and guides; prepare a trip draft.</td><td>No account or private trip access.</td></tr>
         <tr><th scope="row">Tourist</th><td>Save and manage own trips; submit guide requests; view own request status.</td><td>Cannot access another traveller’s trips or review queues.</td></tr>
         <tr><th scope="row">Hotel manager</th><td>Edit own hotel draft, rooms and photos; submit changes for review.</td><td>Cannot approve or publish listings, or change another manager’s data.</td></tr>
-        <tr><th scope="row">Administrator</th><td>Review listings and hotels; publish or suspend catalogue entries; decide guide requests; manage sourced visitor answers; view aggregate reports.</td><td>Changes are permission checked and audited. Account credentials and private trip content are not shown here.</td></tr>
+        <tr><th scope="row">Administrator</th><td>Review listings and hotels; publish or suspend catalogue entries; decide guide requests; view aggregate reports.</td><td>Changes are permission checked and audited. Account credentials and private trip content are not shown here.</td></tr>
       </tbody></table></div>
     </section>
 

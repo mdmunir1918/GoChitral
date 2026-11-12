@@ -22,6 +22,7 @@
     "auth:flows": "node --conditions=react-server --import tsx prisma/verify-auth-flows.ts",
     "hotels:verify": "tsx prisma/verify-hotels.ts",
     "planner:verify": "tsx prisma/verify-planner.ts",
+    "planner:assistant:verify": "node --import tsx src/features/planner/verify-assistant.ts",
     "planner:db": "node --conditions=react-server --import tsx prisma/verify-planner-db.ts",
     "trips:verify": "node --conditions=react-server --import tsx prisma/verify-trips.ts",
     "guides:verify": "node --conditions=react-server --import tsx prisma/verify-guide-requests.ts",

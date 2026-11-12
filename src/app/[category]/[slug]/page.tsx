@@ -9,7 +9,6 @@ import { HotelOverview } from "@/features/hotels/overview";
 import { session, userDatabase } from "@/lib/auth/session";
 import { GuideRequestForm } from "./guide-request-form";
 import { MapDrawer } from "@/features/maps/map-drawer";
-import { AssistantDrawer } from "@/features/recommendations/assistant-drawer";
 import "./detail.css";
 
 type Props = PageProps<"/[category]/[slug]">;
@@ -45,7 +44,6 @@ export default async function ListingPage({ params }: Props) {
           <p><Link className="browse-link" href={`/plan?add=${encodeURIComponent(item.id)}`}>Add to trip →</Link></p>
           <MapDrawer label="Open map and route notes" stops={[{ id: item.id, title: item.title, location: item.location,
             latitude: item.latitude, longitude: item.longitude, visitorNote: item.visitorNote, reviewed: item.reviewed }]} />
-          <AssistantDrawer contextListingId={item.id} />
           {(item.category === "activities" || item.category === "guides") && <p>{item.servicePriceMinor == null ? "Price unknown" : item.servicePriceMinor === 0 ? "Free" : `PKR ${new Intl.NumberFormat("en-PK", { minimumFractionDigits: 2 }).format(item.servicePriceMinor / 100)}`} · {item.category === "activities" ? "per person" : "per group per day · estimated"}</p>}
           {item.category === "guides" && item.guideProfile && <section className="guide-profile" aria-label="Guide profile">
             <h2>Guide profile</h2><p><strong>Languages</strong> · {item.guideProfile.languages.join(", ")}</p>
